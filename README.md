@@ -5,8 +5,8 @@ A polygon Clipping and Offsetting library for Rust.
 The create is a Rust wrapper around the C++ version of 
 [Clipper2](https://github.com/AngusJohnson/Clipper2).
 
-[![crate.io](https://img.shields.io/crates/v/clipper2-sys.svg)](https://crates.io/crates/clipper2-sys)
-[![docs.rs](https://docs.rs/clipper2-sys/badge.svg)](https://docs.rs/clipper2-sys)
+[![crate.io](https://img.shields.io/crates/v/clipper2.svg)](https://crates.io/crates/clipper2)
+[![docs.rs](https://docs.rs/clipper2/badge.svg)](https://docs.rs/clipper2)
 
 Compile with cargo feature `generate-bindings` to generate bindings at build 
 time.
