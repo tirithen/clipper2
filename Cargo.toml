@@ -1,0 +1,25 @@
+[package]
+name = "clipper2"
+version = "0.1.0"
+authors = ["Fredrik Söderström <tirithen@gmail.com>"]
+edition = "2021"
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/tirithen/clipper2"
+documentation = "https://docs.rs/clipper2/"
+description = "A polygon Clipping and Offsetting library for Rust."
+keywords = ["polygon", "boolean", "clip", "clipper", "clipper2"]
+categories = ["algorithms", "external-ffi-bindings"]
+
+[features]
+default = []
+generate-bindings = ["bindgen"]
+update-bindings = ["generate-bindings"]
+glam = ["dep:glam"]
+
+[build-dependencies]
+bindgen = { version = "0.69", optional = true }
+cc = "1"
+
+[dependencies]
+glam = { version = "0.25", optional = true }

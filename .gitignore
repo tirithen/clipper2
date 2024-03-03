@@ -1,0 +1,7 @@
+/target
+/build
+clipper2/CMakeFiles/
+clipper2/Makefile
+clipper2/CMakeCache.txt
+clipper2/cmake_install.cmake
+clipper2/libclipper2.a
