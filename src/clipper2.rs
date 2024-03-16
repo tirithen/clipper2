@@ -35,6 +35,22 @@ pub fn inflate(
     }
 }
 
+pub fn intersect(subjects: Polygons, clips: Polygons) -> Polygons {
+    unsafe { intersect_c(subjects.into(), clips.into()).into() }
+}
+
+pub fn union(subjects: Polygons) -> Polygons {
+    unsafe { union_c(subjects.into()).into() }
+}
+
+pub fn difference(subjects: Polygons, clips: Polygons) -> Polygons {
+    unsafe { difference_c(subjects.into(), clips.into()).into() }
+}
+
+pub fn xor(subjects: Polygons, clips: Polygons) -> Polygons {
+    unsafe { xor_c(subjects.into(), clips.into()).into() }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Vertex(i64, i64);
 
@@ -591,6 +607,188 @@ mod tests {
                 Vertex::new(15.15, 3.0),
                 Vertex::new(4.854, 3.0),
                 Vertex::new(10.0, 13.3)
+            ]
+        );
+    }
+
+    #[test]
+    fn test_intersect() {
+        let path1 = Path::new(
+            vec![
+                Vertex::new(0.0, 0.0),
+                Vertex::new(10.0, 0.0),
+                Vertex::new(10.0, 10.0),
+                Vertex::new(0.0, 10.0),
+            ],
+            true,
+        );
+        let path2 = Path::new(
+            vec![
+                Vertex::new(5.0, 5.0),
+                Vertex::new(15.0, 5.0),
+                Vertex::new(15.0, 15.0),
+                Vertex::new(5.0, 15.0),
+            ],
+            true,
+        );
+        let subjects = Polygons::new(vec![Polygon::new(vec![path1.clone()], PathType::Subject)]);
+        let clips = Polygons::new(vec![Polygon::new(vec![path2.clone()], PathType::Clip)]);
+
+        let output = intersect(subjects, clips);
+
+        assert_eq!(
+            output
+                .polygons()
+                .first()
+                .unwrap()
+                .paths()
+                .first()
+                .unwrap()
+                .vertices(),
+            &vec![
+                Vertex::new(10.0, 10.0),
+                Vertex::new(5.0, 10.0),
+                Vertex::new(5.0, 5.0),
+                Vertex::new(10.0, 5.0),
+            ]
+        );
+    }
+
+    #[test]
+    fn test_union() {
+        let path1 = Path::new(
+            vec![
+                Vertex::new(0.0, 0.0),
+                Vertex::new(10.0, 0.0),
+                Vertex::new(10.0, 10.0),
+                Vertex::new(0.0, 10.0),
+            ],
+            true,
+        );
+        let path2 = Path::new(
+            vec![
+                Vertex::new(5.0, 5.0),
+                Vertex::new(15.0, 5.0),
+                Vertex::new(15.0, 15.0),
+                Vertex::new(5.0, 15.0),
+            ],
+            true,
+        );
+        let polygons = Polygons::new(vec![Polygon::new(
+            vec![path1.clone(), path2.clone()],
+            PathType::Subject,
+        )]);
+
+        let output = union(polygons);
+
+        assert_eq!(
+            output
+                .polygons()
+                .first()
+                .unwrap()
+                .paths()
+                .first()
+                .unwrap()
+                .vertices(),
+            &vec![
+                Vertex::new(10.0, 5.0),
+                Vertex::new(15.0, 5.0),
+                Vertex::new(15.0, 15.0),
+                Vertex::new(5.0, 15.0),
+                Vertex::new(5.0, 10.0),
+                Vertex::new(0.0, 10.0),
+                Vertex::new(0.0, 0.0),
+                Vertex::new(10.0, 0.0)
+            ]
+        );
+    }
+
+    #[test]
+    fn test_difference() {
+        let path1 = Path::new(
+            vec![
+                Vertex::new(0.0, 0.0),
+                Vertex::new(10.0, 0.0),
+                Vertex::new(10.0, 10.0),
+                Vertex::new(0.0, 10.0),
+            ],
+            true,
+        );
+        let path2 = Path::new(
+            vec![
+                Vertex::new(5.0, 5.0),
+                Vertex::new(15.0, 5.0),
+                Vertex::new(15.0, 15.0),
+                Vertex::new(5.0, 15.0),
+            ],
+            true,
+        );
+        let subjects = Polygons::new(vec![Polygon::new(vec![path1.clone()], PathType::Subject)]);
+        let clips = Polygons::new(vec![Polygon::new(vec![path2.clone()], PathType::Clip)]);
+
+        let output = difference(subjects, clips);
+
+        assert_eq!(
+            output
+                .polygons()
+                .first()
+                .unwrap()
+                .paths()
+                .first()
+                .unwrap()
+                .vertices(),
+            &vec![
+                Vertex::new(10.0, 5.0),
+                Vertex::new(5.0, 5.0),
+                Vertex::new(5.0, 10.0),
+                Vertex::new(0.0, 10.0),
+                Vertex::new(0.0, 0.0),
+                Vertex::new(10.0, 0.0),
+            ]
+        );
+    }
+
+    #[test]
+    fn test_xor() {
+        let path1 = Path::new(
+            vec![
+                Vertex::new(0.0, 0.0),
+                Vertex::new(10.0, 0.0),
+                Vertex::new(10.0, 10.0),
+                Vertex::new(0.0, 10.0),
+            ],
+            true,
+        );
+        let path2 = Path::new(
+            vec![
+                Vertex::new(5.0, 5.0),
+                Vertex::new(15.0, 5.0),
+                Vertex::new(15.0, 15.0),
+                Vertex::new(5.0, 15.0),
+            ],
+            true,
+        );
+        let subjects = Polygons::new(vec![Polygon::new(vec![path1.clone()], PathType::Subject)]);
+        let clips = Polygons::new(vec![Polygon::new(vec![path2.clone()], PathType::Clip)]);
+
+        let output = xor(subjects, clips);
+
+        assert_eq!(
+            output
+                .polygons()
+                .first()
+                .unwrap()
+                .paths()
+                .first()
+                .unwrap()
+                .vertices(),
+            &vec![
+                Vertex::new(15.0, 15.0),
+                Vertex::new(5.0, 15.0),
+                Vertex::new(5.0, 10.0),
+                Vertex::new(10.0, 10.0),
+                Vertex::new(10.0, 5.0),
+                Vertex::new(15.0, 5.0),
             ]
         );
     }

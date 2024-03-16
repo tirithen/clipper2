@@ -1,14 +1,11 @@
 #include "wrapper.h"
+#include "clipper.core.h"
 #include "clipper.h"
-#include <iostream>
-#include <queue>
 
 using Clipper2Lib::InflatePaths;
 using Clipper2Lib::Paths64;
 using Clipper2Lib::Point64;
 using Clipper2Lib::PolyTree64;
-using Clipper2Lib::PolyTreeToPaths64;
-using Clipper2Lib::ScalePaths;
 
 Clipper2Lib::Path64 get_path(const PathC &path)
 {
@@ -145,6 +142,33 @@ PolygonsC inflate_c(
         miter_limit,
         arc_tolerance);
     return get_polygons_from_closed_paths(paths);
+}
+
+PolygonsC intersect_c(PolygonsC subjects, PolygonsC clips) {
+    Paths64 subjects_paths = get_closed_paths_from_polygons(subjects);
+    Paths64 clips_paths = get_closed_paths_from_polygons(clips);
+    Paths64 result = Clipper2Lib::Intersect(subjects_paths, clips_paths, Clipper2Lib::FillRule::NonZero);
+    return get_polygons_from_closed_paths(result);
+}
+
+PolygonsC union_c(PolygonsC subjects) {
+    Paths64 subjects_paths = get_closed_paths_from_polygons(subjects);
+    Paths64 result = Clipper2Lib::Union(subjects_paths, Clipper2Lib::FillRule::NonZero);
+    return get_polygons_from_closed_paths(result);
+}
+
+PolygonsC difference_c(PolygonsC subjects, PolygonsC clips) {
+    Paths64 subjects_paths = get_closed_paths_from_polygons(subjects);
+    Paths64 clips_paths = get_closed_paths_from_polygons(clips);
+    Paths64 result = Clipper2Lib::Difference(subjects_paths, clips_paths, Clipper2Lib::FillRule::NonZero);
+    return get_polygons_from_closed_paths(result);
+}
+
+PolygonsC xor_c(PolygonsC subjects, PolygonsC clips) {
+    Paths64 subjects_paths = get_closed_paths_from_polygons(subjects);
+    Paths64 clips_paths = get_closed_paths_from_polygons(clips);
+    Paths64 result = Clipper2Lib::Xor(subjects_paths, clips_paths, Clipper2Lib::FillRule::NonZero);
+    return get_polygons_from_closed_paths(result);
 }
 
 void free_path_c(PathC path)

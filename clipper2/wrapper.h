@@ -70,6 +70,14 @@ extern "C"
         double miter_limit,
         double arc_tolerance);
 
+    PolygonsC intersect_c(PolygonsC subjects, PolygonsC clips);
+
+    PolygonsC union_c(PolygonsC subjects);
+
+    PolygonsC difference_c(PolygonsC subjects, PolygonsC clips);
+
+    PolygonsC xor_c(PolygonsC subjects, PolygonsC clips);
+
     void free_path_c(PathC path);
     void free_polygon_c(PolygonC polygon);
     void free_polygons_c(PolygonsC polygons);

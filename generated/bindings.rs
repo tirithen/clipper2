@@ -177,6 +177,18 @@ extern "C" {
     ) -> PolygonsC;
 }
 extern "C" {
+    pub fn intersect_c(subjects: PolygonsC, clips: PolygonsC) -> PolygonsC;
+}
+extern "C" {
+    pub fn union_c(subjects: PolygonsC) -> PolygonsC;
+}
+extern "C" {
+    pub fn difference_c(subjects: PolygonsC, clips: PolygonsC) -> PolygonsC;
+}
+extern "C" {
+    pub fn xor_c(subjects: PolygonsC, clips: PolygonsC) -> PolygonsC;
+}
+extern "C" {
     pub fn free_path_c(path: PathC);
 }
 extern "C" {
