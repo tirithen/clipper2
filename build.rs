@@ -13,6 +13,7 @@ fn main() {
         .file("clipper2/clipper.offset.cpp")
         .file("clipper2/clipper.rectclip.cpp")
         .file("clipper2/wrapper.cpp")
+        .flag_if_supported("-std:c++17") // MSVC
         .flag_if_supported("-std=c++17")
         .compile("clipper2");
 
