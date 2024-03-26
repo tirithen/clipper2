@@ -12,44 +12,44 @@ include!(concat!(
 
 const PRECISION_MULTIPLIER: f64 = 100.0;
 
-pub fn inflate(
-    polygons: Polygons,
-    delta: f64,
-    join_type: JoinType,
-    end_type: EndType,
-    miter_limit: f64,
-    arc_tolerance: f64,
-) -> Polygons {
-    let precision = PRECISION_MULTIPLIER;
+// pub fn inflate(
+//     polygons: Polygons,
+//     delta: f64,
+//     join_type: JoinType,
+//     end_type: EndType,
+//     miter_limit: f64,
+//     arc_tolerance: f64,
+// ) -> Polygons {
+//     let precision = PRECISION_MULTIPLIER;
 
-    unsafe {
-        inflate_c(
-            polygons.into(),
-            delta * precision,
-            join_type.into(),
-            end_type.into(),
-            miter_limit * precision,
-            arc_tolerance * precision,
-        )
-        .into()
-    }
+//     unsafe {
+//         inflate_c(
+//             polygons.into(),
+//             delta * precision,
+//             join_type.into(),
+//             end_type.into(),
+//             miter_limit * precision,
+//             arc_tolerance * precision,
+//         )
+//         .into()
+//     }
+// }
+
+// pub fn intersect(subjects: Polygons, clips: Polygons) -> Polygons {
+//     unsafe { intersect_c(subjects.into(), clips.into()).into() }
+// }
+
+pub fn union(subjects: Paths, fill_rule: FillRule) -> Paths {
+    unsafe { union_c(subjects, fill_rule.into()).into() }
 }
 
-pub fn intersect(subjects: Polygons, clips: Polygons) -> Polygons {
-    unsafe { intersect_c(subjects.into(), clips.into()).into() }
-}
+// pub fn difference(subjects: Polygons, clips: Polygons) -> Polygons {
+//     unsafe { difference_c(subjects.into(), clips.into()).into() }
+// }
 
-pub fn union(subjects: Polygons) -> Polygons {
-    unsafe { union_c(subjects.into()).into() }
-}
-
-pub fn difference(subjects: Polygons, clips: Polygons) -> Polygons {
-    unsafe { difference_c(subjects.into(), clips.into()).into() }
-}
-
-pub fn xor(subjects: Polygons, clips: Polygons) -> Polygons {
-    unsafe { xor_c(subjects.into(), clips.into()).into() }
-}
+// pub fn xor(subjects: Polygons, clips: Polygons) -> Polygons {
+//     unsafe { xor_c(subjects.into(), clips.into()).into() }
+// }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Vertex(i64, i64);
@@ -111,195 +111,65 @@ impl From<glam::DVec2> for Vertex {
     }
 }
 
-impl PathC {
-    pub fn vertices(&self) -> &[VertexC] {
-        unsafe { std::slice::from_raw_parts(self.vertices, self.vertices_count) }
-    }
-}
+// impl PathC {
+//     pub fn vertices(&self) -> &[VertexC] {
+//         unsafe { std::slice::from_raw_parts(self.vertices, self.vertices_count) }
+//     }
+// }
 
-impl PartialEq for PathC {
-    fn eq(&self, other: &Self) -> bool {
-        self.closed == other.closed && self.vertices() == other.vertices()
-    }
-}
+// impl PartialEq for PathC {
+//     fn eq(&self, other: &Self) -> bool {
+//         self.closed == other.closed && self.vertices() == other.vertices()
+//     }
+// }
 
-impl Eq for PathC {}
+// impl Eq for PathC {}
 
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct Path {
-    vertices: Vec<Vertex>,
-    closed: bool,
-}
+// pub type Path = Vec<Vertex>;
 
-impl Path {
-    pub fn new(vertices: Vec<Vertex>, closed: bool) -> Self {
-        Self { vertices, closed }
-    }
+// impl From<Path> for PathC {
+//     fn from(value: Path) -> Self {
+//         let mut vertices: Vec<[i64; 2]> = Vec::with_capacity(value.vertices.len());
+//         for v in value.vertices.iter() {
+//             vertices.push([v.0, v.1]);
+//         }
+//         let vertices_boxed = vertices.into_boxed_slice();
+//         let vertices_ptr = Box::into_raw(vertices_boxed) as *mut [i64; 2];
 
-    pub fn vertices(&self) -> &Vec<Vertex> {
-        &self.vertices
-    }
+//         Self {
+//             vertices: vertices_ptr,
+//             vertices_count: value.vertices.len(),
+//             closed: if value.closed { 1 } else { 0 },
+//         }
+//     }
+// }
 
-    pub fn closed(&self) -> bool {
-        self.closed
-    }
+// impl From<PathC> for Path {
+//     fn from(value: PathC) -> Self {
+//         let mut vertices: Vec<Vertex> = Vec::with_capacity(value.vertices_count);
+//         for v in value.vertices().iter() {
+//             vertices.push(Vertex(v[0], v[1]));
+//         }
 
-    pub fn is_empty(&self) -> bool {
-        self.vertices.is_empty()
-    }
-}
+//         vertices
+//     }
+// }
 
-impl From<Path> for PathC {
-    fn from(value: Path) -> Self {
-        let mut vertices: Vec<[i64; 2]> = Vec::with_capacity(value.vertices.len());
-        for v in value.vertices.iter() {
-            vertices.push([v.0, v.1]);
-        }
-        let vertices_boxed = vertices.into_boxed_slice();
-        let vertices_ptr = Box::into_raw(vertices_boxed) as *mut [i64; 2];
+// pub type Paths = Vec<Path>;
 
-        Self {
-            vertices: vertices_ptr,
-            vertices_count: value.vertices.len(),
-            closed: if value.closed { 1 } else { 0 },
-        }
-    }
-}
+// impl PolygonC {
+//     pub fn paths(&self) -> &[PathC] {
+//         unsafe { std::slice::from_raw_parts(self.paths, self.paths_count) }
+//     }
+// }
 
-impl From<PathC> for Path {
-    fn from(value: PathC) -> Self {
-        let mut vertices: Vec<Vertex> = Vec::with_capacity(value.vertices_count);
-        for v in value.vertices().iter() {
-            vertices.push(Vertex(v[0], v[1]));
-        }
+// impl PartialEq for PolygonC {
+//     fn eq(&self, other: &Self) -> bool {
+//         self.type_ == other.type_ && self.paths() == other.paths()
+//     }
+// }
 
-        Self {
-            vertices,
-            closed: value.closed != 0,
-        }
-    }
-}
-
-impl PolygonC {
-    pub fn paths(&self) -> &[PathC] {
-        unsafe { std::slice::from_raw_parts(self.paths, self.paths_count) }
-    }
-}
-
-impl PartialEq for PolygonC {
-    fn eq(&self, other: &Self) -> bool {
-        self.type_ == other.type_ && self.paths() == other.paths()
-    }
-}
-
-impl Eq for PolygonC {}
-
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct Polygon {
-    paths: Vec<Path>,
-    type_: PathType,
-}
-
-impl Polygon {
-    pub fn new(paths: Vec<Path>, type_: PathType) -> Self {
-        Self { paths, type_ }
-    }
-
-    pub fn paths(&self) -> &Vec<Path> {
-        &self.paths
-    }
-
-    pub fn type_(&self) -> &PathType {
-        &self.type_
-    }
-}
-
-impl From<Polygon> for PolygonC {
-    fn from(value: Polygon) -> Self {
-        let mut paths: Vec<PathC> = Vec::with_capacity(value.paths.len());
-        for p in value.paths.iter() {
-            paths.push(PathC::from(p.clone()));
-        }
-        let paths_boxed = paths.into_boxed_slice();
-        let paths_ptr = Box::into_raw(paths_boxed) as *mut PathC;
-
-        Self {
-            paths: paths_ptr,
-            paths_count: value.paths.len(),
-            type_: value.type_.into(),
-        }
-    }
-}
-
-impl From<PolygonC> for Polygon {
-    fn from(value: PolygonC) -> Self {
-        let mut paths: Vec<Path> = Vec::with_capacity(value.paths_count);
-        for p in value.paths().iter() {
-            paths.push(Path::from(*p));
-        }
-
-        Self {
-            paths,
-            type_: PathType::from(value.type_),
-        }
-    }
-}
-
-impl PolygonsC {
-    pub fn polygons(&self) -> &[PolygonC] {
-        unsafe { std::slice::from_raw_parts(self.polygons, self.polygons_count) }
-    }
-}
-
-impl PartialEq for PolygonsC {
-    fn eq(&self, other: &Self) -> bool {
-        self.polygons() == other.polygons()
-    }
-}
-
-impl Eq for PolygonsC {}
-
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct Polygons {
-    polygons: Vec<Polygon>,
-}
-
-impl Polygons {
-    pub fn new(polygons: Vec<Polygon>) -> Self {
-        Self { polygons }
-    }
-
-    pub fn polygons(&self) -> &Vec<Polygon> {
-        &self.polygons
-    }
-}
-
-impl From<Polygons> for PolygonsC {
-    fn from(value: Polygons) -> Self {
-        let mut polygons: Vec<PolygonC> = Vec::with_capacity(value.polygons.len());
-        for p in value.polygons.iter() {
-            polygons.push(PolygonC::from(p.clone()));
-        }
-        let polygons_boxed = polygons.into_boxed_slice();
-        let polygons_ptr = Box::into_raw(polygons_boxed) as *mut PolygonC;
-
-        Self {
-            polygons: polygons_ptr,
-            polygons_count: value.polygons.len(),
-        }
-    }
-}
-
-impl From<PolygonsC> for Polygons {
-    fn from(value: PolygonsC) -> Self {
-        let mut polygons: Vec<Polygon> = Vec::with_capacity(value.polygons_count);
-        for p in value.polygons().iter() {
-            polygons.push(Polygon::from(*p));
-        }
-
-        Self { polygons }
-    }
-}
+// impl Eq for PolygonC {}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub enum ClipType {
@@ -429,6 +299,7 @@ impl From<PathType> for PathTypeC {
     }
 }
 
+/*
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -793,3 +664,4 @@ mod tests {
         );
     }
 }
+*/

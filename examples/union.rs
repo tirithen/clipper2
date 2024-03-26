@@ -1,30 +1,20 @@
 use clipper2::{Path, PathType, Polygon, Polygons, Vertex};
 
 fn main() {
-    let path1 = Path::new(
-        vec![
-            Vertex::new(0.1, 0.0),
-            Vertex::new(10.0, 0.0),
-            Vertex::new(10.0, 10.0),
-            Vertex::new(0.0, 10.0),
-        ],
-        true,
-    );
-    let path2 = Path::new(
-        vec![
-            Vertex::new(5.0, 5.0),
-            Vertex::new(15.0, 5.0),
-            Vertex::new(15.0, 15.0),
-            Vertex::new(5.0, 15.0),
-        ],
-        true,
-    );
-    let polygons = Polygons::new(vec![Polygon::new(
-        vec![path1.clone(), path2.clone()],
-        PathType::Subject,
-    )]);
+    let path1 = vec![
+        [100, 0],
+        [1000, 0],
+        [1000, 1000],
+        [0, 1000],
+    ];
+    let path2 = vec![
+        [500, 500],
+        [1500, 500],
+        [1500, 1500],
+        [500, 1500],
+    ];
 
-    let output = clipper2::union(polygons);
+    let output = clipper2::union(vec![path1, path2], FillRule::NonZero);
     println!(
         "Vertices: {}",
         output

@@ -22,4 +22,4 @@ bindgen = { version = "0.69", optional = true }
 cc = "1"
 
 [dependencies]
-glam = { version = "0.25", optional = true }
+glam = { version = "0.26", optional = true }

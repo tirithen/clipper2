@@ -2,194 +2,57 @@
 #include "clipper.core.h"
 #include "clipper.h"
 
-using Clipper2Lib::InflatePaths;
-using Clipper2Lib::Paths64;
-using Clipper2Lib::Point64;
-using Clipper2Lib::PolyTree64;
+#ifdef __cplusplus
+// Correct definition of the constructor outside of the header file
+RustFriendlyPaths::RustFriendlyPaths(size_t num_paths, const Clipper2Lib::Point64 **paths, const size_t *path_lengths)
+    : num_paths(num_paths), paths(paths), path_lengths(path_lengths) {}
+#endif
 
-Clipper2Lib::Path64 get_path(const PathC &path)
+// Function to convert from RustFriendlyPaths to Paths64
+Clipper2Lib::Paths64 convert_to_paths64(const RustFriendlyPaths &subjects)
 {
-    Clipper2Lib::Path64 clipper_path;
-    auto path_size = path.vertices_count;
-    clipper_path.reserve(path_size);
-
-    for (size_t i = 0; i < path_size; ++i)
+    Clipper2Lib::Paths64 paths;
+    for (size_t i = 0; i < subjects.num_paths; ++i)
     {
-        clipper_path.push_back(Point64(path.vertices[i][0], path.vertices[i][1]));
+        paths.emplace_back(subjects.paths[i], subjects.paths[i] + subjects.path_lengths[i]);
     }
-    return clipper_path;
-}
-
-std::pair<Paths64, std::vector<bool>> get_polygon_paths(const PolygonC &polygon)
-{
-    Paths64 paths;
-    paths.reserve(polygon.paths_count);
-
-    std::vector<bool> closed;
-    closed.reserve(polygon.paths_count);
-
-    for (size_t i = 0; i < polygon.paths_count; ++i)
-    {
-        paths.push_back(get_path(polygon.paths[i]));
-        closed.push_back(polygon.paths[i].closed);
-    }
-    return std::make_pair(paths, closed);
-}
-
-Clipper2Lib::Paths64 get_closed_paths_from_polygons(PolygonsC polygons)
-{
-    Paths64 paths;
-
-    for (size_t i = 0; i < polygons.polygons_count; ++i)
-    {
-        auto &polygon = polygons.polygons[i];
-        auto paths_closed = get_polygon_paths(polygon);
-        Paths64 &next_paths = paths_closed.first;
-
-        paths.reserve(paths.size() + next_paths.size());
-        paths.insert(paths.end(), next_paths.begin(), next_paths.end());
-    }
-
     return paths;
 }
 
-PathC get_path_from_closed_path(Clipper2Lib::Path64 &clipper_path)
+// Function to convert from Paths64 to RustFriendlyPaths
+RustFriendlyPaths *convert_from_paths64(const Clipper2Lib::Paths64 &paths)
 {
-    PathC path;
-    path.vertices_count = clipper_path.size();
-    path.vertices = new VertexC[path.vertices_count];
-    path.closed = true;
-    for (size_t i = 0; i < path.vertices_count; ++i)
-    {
-        path.vertices[i][0] = clipper_path[i].x;
-        path.vertices[i][1] = clipper_path[i].y;
-    }
-    return path;
-}
+    size_t size = paths.size();
+    auto **tempPaths = new const Clipper2Lib::Point64 *[size];
+    auto *tempPathLengths = new size_t[size];
 
-PolygonsC get_polygons_from_closed_paths(Clipper2Lib::Paths64 &closed_paths)
-{
-    std::vector<PolygonC> polygon_vector;
-
-    for (size_t i = 0; i < closed_paths.size(); ++i)
+    for (size_t i = 0; i < size; ++i)
     {
-        PolygonC polygon;
-        polygon.type = ptSubject;
-        polygon.paths_count = 1;
-        polygon.paths = new PathC[1];
-        polygon.paths[0] = get_path_from_closed_path(closed_paths[i]);
-        polygon_vector.push_back(polygon);
+        tempPathLengths[i] = paths[i].size();
+        tempPaths[i] = const_cast<Clipper2Lib::Point64 *>(paths[i].data());
     }
 
-    PolygonsC polygons;
-    polygons.polygons_count = polygon_vector.size();
-    polygons.polygons = new PolygonC[polygons.polygons_count];
-    std::copy(polygon_vector.begin(), polygon_vector.end(), polygons.polygons);
-
-    return polygons;
+    auto *rustFriendlyPaths = new RustFriendlyPaths(size, tempPaths, tempPathLengths);
+    return rustFriendlyPaths;
 }
 
-Clipper2Lib::JoinType to_cpp_join_type(JoinTypeC from)
+extern "C"
 {
-    switch (from)
+    RustFriendlyPaths *union_c(const RustFriendlyPaths &subjects, Clipper2Lib::FillRule fillrule)
     {
-    case JoinTypeC::jtSquare:
-        return Clipper2Lib::JoinType::Square;
-    case JoinTypeC::jtBevel:
-        return Clipper2Lib::JoinType::Bevel;
-    case JoinTypeC::jtRound:
-        return Clipper2Lib::JoinType::Round;
-    case JoinTypeC::jtMiter:
-        return Clipper2Lib::JoinType::Miter;
-    default:
-        throw std::invalid_argument("Unknown JoinTypeC value");
+        Clipper2Lib::Paths64 subjects_cpp = convert_to_paths64(subjects);
+        Clipper2Lib::Paths64 result_cpp = Clipper2Lib::Union(subjects_cpp, fillrule);
+        return convert_from_paths64(result_cpp);
     }
-}
 
-Clipper2Lib::EndType to_cpp_end_type(EndTypeC from)
-{
-    switch (from)
+    void free_rust_friendly_paths_c(RustFriendlyPaths *paths)
     {
-    case EndTypeC::etClosedPolygon:
-        return Clipper2Lib::EndType::Polygon;
-    case EndTypeC::etClosedJoined:
-        return Clipper2Lib::EndType::Joined;
-    case EndTypeC::etOpenButt:
-        return Clipper2Lib::EndType::Butt;
-    case EndTypeC::etOpenSquare:
-        return Clipper2Lib::EndType::Square;
-    case EndTypeC::etOpenRound:
-        return Clipper2Lib::EndType::Round;
-    default:
-        throw std::invalid_argument("Unknown EndTypeC value");
+        for (size_t i = 0; i < paths->num_paths; ++i)
+        {
+            delete[] paths->paths[i];
+        }
+        delete[] paths->paths;
+        delete[] paths->path_lengths;
+        delete paths;
     }
-}
-
-PolygonsC inflate_c(
-    PolygonsC polygons,
-    double delta,
-    JoinTypeC join_type = jtMiter,
-    EndTypeC end_type = etClosedPolygon,
-    double miter_limit = 2.0,
-    double arc_tolerance = 0.0)
-{
-    Paths64 polygons_paths = get_closed_paths_from_polygons(polygons);
-    Paths64 paths = InflatePaths(
-        polygons_paths,
-        delta,
-        to_cpp_join_type(join_type),
-        to_cpp_end_type(end_type),
-        miter_limit,
-        arc_tolerance);
-    return get_polygons_from_closed_paths(paths);
-}
-
-PolygonsC intersect_c(PolygonsC subjects, PolygonsC clips) {
-    Paths64 subjects_paths = get_closed_paths_from_polygons(subjects);
-    Paths64 clips_paths = get_closed_paths_from_polygons(clips);
-    Paths64 result = Clipper2Lib::Intersect(subjects_paths, clips_paths, Clipper2Lib::FillRule::NonZero);
-    return get_polygons_from_closed_paths(result);
-}
-
-PolygonsC union_c(PolygonsC subjects) {
-    Paths64 subjects_paths = get_closed_paths_from_polygons(subjects);
-    Paths64 result = Clipper2Lib::Union(subjects_paths, Clipper2Lib::FillRule::NonZero);
-    return get_polygons_from_closed_paths(result);
-}
-
-PolygonsC difference_c(PolygonsC subjects, PolygonsC clips) {
-    Paths64 subjects_paths = get_closed_paths_from_polygons(subjects);
-    Paths64 clips_paths = get_closed_paths_from_polygons(clips);
-    Paths64 result = Clipper2Lib::Difference(subjects_paths, clips_paths, Clipper2Lib::FillRule::NonZero);
-    return get_polygons_from_closed_paths(result);
-}
-
-PolygonsC xor_c(PolygonsC subjects, PolygonsC clips) {
-    Paths64 subjects_paths = get_closed_paths_from_polygons(subjects);
-    Paths64 clips_paths = get_closed_paths_from_polygons(clips);
-    Paths64 result = Clipper2Lib::Xor(subjects_paths, clips_paths, Clipper2Lib::FillRule::NonZero);
-    return get_polygons_from_closed_paths(result);
-}
-
-void free_path_c(PathC path)
-{
-    delete[] path.vertices;
-}
-
-void free_polygon_c(PolygonC polygon)
-{
-    for (size_t i = 0; i < polygon.paths_count; ++i)
-    {
-        free_path_c(polygon.paths[i]);
-    }
-    delete[] polygon.paths;
-}
-
-void free_polygons_c(PolygonsC polygons)
-{
-    for (size_t i = 0; i < polygons.polygons_count; ++i)
-    {
-        free_polygon_c(polygons.polygons[i]);
-    }
-    delete[] polygons.polygons;
 }

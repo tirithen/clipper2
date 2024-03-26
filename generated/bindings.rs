@@ -180,7 +180,7 @@ extern "C" {
     pub fn intersect_c(subjects: PolygonsC, clips: PolygonsC) -> PolygonsC;
 }
 extern "C" {
-    pub fn union_c(subjects: PolygonsC) -> PolygonsC;
+    pub fn union_c(subjects: &PathsC, fill_rule: FillRuleC) -> PathsC;
 }
 extern "C" {
     pub fn difference_c(subjects: PolygonsC, clips: PolygonsC) -> PolygonsC;

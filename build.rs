@@ -14,7 +14,7 @@ fn main() {
         .file("clipper2/clipper.rectclip.cpp")
         .file("clipper2/wrapper.cpp")
         .flag_if_supported("-std:c++17") // MSVC
-        .flag_if_supported("-std=c++17")
+        .flag_if_supported("-std=c++17") // GCC, Clang, etc.
         .compile("clipper2");
 
     let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap();
@@ -35,22 +35,11 @@ fn main() {
     {
         let bindings = bindgen::Builder::default()
             .header("clipper2/wrapper.h")
-            .allowlist_type("PolygonsC")
-            .allowlist_type("ClipTypeC")
-            .allowlist_type("JoinTypeC")
-            .allowlist_type("EndTypeC")
-            .allowlist_type("PathTypeC")
-            .allowlist_type("VertexC")
-            .allowlist_type("PathC")
-            .allowlist_type("PolygonC")
-            .allowlist_function("inflate_c")
-            .allowlist_function("intersect_c")
+            .allowlist_type("RustFriendlyPaths")
+            .allowlist_type("FillRule")
+            .allowlist_type("Point64")
             .allowlist_function("union_c")
-            .allowlist_function("difference_c")
-            .allowlist_function("xor_c")
-            .allowlist_function("free_path_c")
-            .allowlist_function("free_polygon_c")
-            .allowlist_function("free_polygons_c")
+            .allowlist_function("free_rust_friendly_paths_c")
             .size_t_is_usize(true)
             .generate()
             .expect("unable to generate bindings");
