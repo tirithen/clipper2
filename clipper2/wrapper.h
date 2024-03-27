@@ -1,90 +1,51 @@
 #ifndef WRAPPER_H
 #define WRAPPER_H
 
+#include <stdint.h>
+#include <stdlib.h>
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include <stdint.h>
-#include <stdlib.h>
-
-    typedef enum ClipTypeC
+    typedef struct PointC
     {
-        ctNone,
-        ctIntersection,
-        ctUnion,
-        ctDifference,
-        ctXor
-    } ClipTypeC;
+        int64_t x;
+        int64_t y;
+    } PointC;
 
-    typedef enum JoinTypeC
+    typedef enum FillRuleC
     {
-        jtSquare,
-        jtBevel,
-        jtRound,
-        jtMiter
-    } JoinTypeC;
+        EvenOdd,
+        NonZero,
+        Positive,
+        Negative
+    } FillRuleC;
 
-    typedef enum EndTypeC
-    {
-        etClosedPolygon,
-        etClosedJoined,
-        etOpenButt,
-        etOpenSquare,
-        etOpenRound
-    } EndTypeC;
+    typedef struct RustFriendlyPathsC RustFriendlyPathsC;
 
-    typedef enum PathTypeC
-    {
-        ptSubject,
-        ptClip
-    } PathTypeC;
-
-    typedef int64_t VertexC[2];
-
-    typedef struct PathC
-    {
-        VertexC *vertices;
-        size_t vertices_count;
-        int closed;
-    } PathC;
-
-    typedef struct PolygonC
-    {
-        PathC *paths;
-        size_t paths_count;
-        PathTypeC type;
-    } PolygonC;
-
-    typedef struct PolygonsC
-    {
-        PolygonC *polygons;
-        size_t polygons_count;
-    } PolygonsC;
-
-    PolygonsC inflate_c(
-        PolygonsC polygons,
-        double delta,
-        JoinTypeC join_type,
-        EndTypeC end_type,
-        double miter_limit,
-        double arc_tolerance);
-
-    PolygonsC intersect_c(PolygonsC subjects, PolygonsC clips);
-
-    PolygonsC union_c(PolygonsC subjects);
-
-    PolygonsC difference_c(PolygonsC subjects, PolygonsC clips);
-
-    PolygonsC xor_c(PolygonsC subjects, PolygonsC clips);
-
-    void free_path_c(PathC path);
-    void free_polygon_c(PolygonC polygon);
-    void free_polygons_c(PolygonsC polygons);
+    RustFriendlyPathsC *union_c(const RustFriendlyPathsC *subjects, FillRuleC fillrule);
+    RustFriendlyPathsC *create_rust_friendly_paths_c(size_t num_paths, const PointC **paths, const size_t *path_lengths);
+    const PointC **get_rust_paths_ptr_c(const RustFriendlyPathsC *rustFriendlyPathsC);
+    const size_t *get_rust_path_lengths_ptr_c(const RustFriendlyPathsC *rustFriendlyPathsC);
+    size_t get_rust_num_paths_c(const RustFriendlyPathsC *rustFriendlyPathsC);
+    void free_rust_friendly_paths_c(RustFriendlyPathsC *paths);
 
 #ifdef __cplusplus
 }
+
+#include "clipper.core.h"
+
+struct RustFriendlyPathsC
+{
+    size_t num_paths;
+    const PointC **paths;
+    const size_t *path_lengths;
+
+    RustFriendlyPathsC(size_t num_paths, const PointC **paths, const size_t *path_lengths);
+};
+
 #endif
 
-#endif // WRAPPER_H
+#endif
