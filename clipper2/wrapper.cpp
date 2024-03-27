@@ -3,49 +3,70 @@
 #include "clipper.h"
 
 #ifdef __cplusplus
-// Correct definition of the constructor outside of the header file
-RustFriendlyPaths::RustFriendlyPaths(size_t num_paths, const Clipper2Lib::Point64 **paths, const size_t *path_lengths)
-    : num_paths(num_paths), paths(paths), path_lengths(path_lengths) {}
-#endif
 
-// Function to convert from RustFriendlyPaths to Paths64
-Clipper2Lib::Paths64 convert_to_paths64(const RustFriendlyPaths &subjects)
+RustFriendlyPathsC::RustFriendlyPathsC(size_t num_paths, const PointC **paths, const size_t *path_lengths)
+    : num_paths(num_paths), paths(paths), path_lengths(path_lengths) {}
+
+Clipper2Lib::Paths64 convert_to_paths64(const RustFriendlyPathsC *subjects)
 {
     Clipper2Lib::Paths64 paths;
-    for (size_t i = 0; i < subjects.num_paths; ++i)
+    for (size_t i = 0; i < subjects->num_paths; ++i)
     {
-        paths.emplace_back(subjects.paths[i], subjects.paths[i] + subjects.path_lengths[i]);
+        paths.emplace_back(subjects->paths[i], subjects->paths[i] + subjects->path_lengths[i]);
     }
     return paths;
 }
 
-// Function to convert from Paths64 to RustFriendlyPaths
-RustFriendlyPaths *convert_from_paths64(const Clipper2Lib::Paths64 &paths)
+RustFriendlyPathsC *convert_from_paths64(const Clipper2Lib::Paths64 &paths)
 {
     size_t size = paths.size();
-    auto **tempPaths = new const Clipper2Lib::Point64 *[size];
+    auto **tempPaths = new const PointC *[size];
     auto *tempPathLengths = new size_t[size];
 
     for (size_t i = 0; i < size; ++i)
     {
         tempPathLengths[i] = paths[i].size();
-        tempPaths[i] = const_cast<Clipper2Lib::Point64 *>(paths[i].data());
+        // tempPaths[i] = const_cast<PointC *>(paths[i].data());
+        tempPaths[i] = reinterpret_cast<const PointC *>(&paths[i]);
     }
 
-    auto *rustFriendlyPaths = new RustFriendlyPaths(size, tempPaths, tempPathLengths);
-    return rustFriendlyPaths;
+    auto *rustFriendlyPathsC = new RustFriendlyPathsC(size, tempPaths, tempPathLengths);
+    return rustFriendlyPathsC;
 }
+
+#endif
 
 extern "C"
 {
-    RustFriendlyPaths *union_c(const RustFriendlyPaths &subjects, Clipper2Lib::FillRule fillrule)
+    RustFriendlyPathsC *union_c(const RustFriendlyPathsC *subjects, FillRuleC fillrule)
     {
+        Clipper2Lib::FillRule cppFillRule = static_cast<Clipper2Lib::FillRule>(fillrule);
         Clipper2Lib::Paths64 subjects_cpp = convert_to_paths64(subjects);
-        Clipper2Lib::Paths64 result_cpp = Clipper2Lib::Union(subjects_cpp, fillrule);
+        Clipper2Lib::Paths64 result_cpp = Clipper2Lib::Union(subjects_cpp, cppFillRule);
         return convert_from_paths64(result_cpp);
     }
 
-    void free_rust_friendly_paths_c(RustFriendlyPaths *paths)
+    RustFriendlyPathsC *create_rust_friendly_paths_c(size_t num_paths, const PointC **paths, const size_t *path_lengths)
+    {
+        return new RustFriendlyPathsC(num_paths, paths, path_lengths);
+    }
+
+    const PointC **get_rust_paths_ptr_c(const RustFriendlyPathsC *rustFriendlyPathsC)
+    {
+        return rustFriendlyPathsC->paths;
+    }
+
+    const size_t *get_rust_path_lengths_ptr_c(const RustFriendlyPathsC *rustFriendlyPathsC)
+    {
+        return rustFriendlyPathsC->path_lengths;
+    }
+
+    size_t get_rust_num_paths_c(const RustFriendlyPathsC *rustFriendlyPathsC)
+    {
+        return rustFriendlyPathsC->num_paths;
+    }
+
+    void free_rust_friendly_paths_c(RustFriendlyPathsC *paths)
     {
         for (size_t i = 0; i < paths->num_paths; ++i)
         {

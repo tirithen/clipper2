@@ -4,36 +4,48 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-// Make sure these includes are outside of the extern "C" for C++ compilation
-#include "clipper.core.h"
-#include "clipper.h"
-
-#ifdef __cplusplus
-// C++-specific struct definition including constructor
-struct RustFriendlyPaths
-{
-    const Clipper2Lib::Point64 **paths;
-    const size_t *path_lengths;
-    size_t num_paths;
-
-    // Ensure the order here matches the declaration order
-    RustFriendlyPaths(size_t num_paths, const Clipper2Lib::Point64 **paths, const size_t *path_lengths);
-};
-#endif // __cplusplus
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-    struct RustFriendlyPaths;
+    typedef struct PointC
+    {
+        int64_t x;
+        int64_t y;
+    } PointC;
 
-    // Function declarations with C linkage
-    RustFriendlyPaths *union_c(const RustFriendlyPaths &subjects, Clipper2Lib::FillRule fillrule);
-    void free_rust_friendly_paths_c(RustFriendlyPaths *paths);
+    typedef enum FillRuleC
+    {
+        EvenOdd,
+        NonZero,
+        Positive,
+        Negative
+    } FillRuleC;
+
+    typedef struct RustFriendlyPathsC RustFriendlyPathsC;
+
+    RustFriendlyPathsC *union_c(const RustFriendlyPathsC *subjects, FillRuleC fillrule);
+    RustFriendlyPathsC *create_rust_friendly_paths_c(size_t num_paths, const PointC **paths, const size_t *path_lengths);
+    const PointC **get_rust_paths_ptr_c(const RustFriendlyPathsC *rustFriendlyPathsC);
+    const size_t *get_rust_path_lengths_ptr_c(const RustFriendlyPathsC *rustFriendlyPathsC);
+    size_t get_rust_num_paths_c(const RustFriendlyPathsC *rustFriendlyPathsC);
+    void free_rust_friendly_paths_c(RustFriendlyPathsC *paths);
 
 #ifdef __cplusplus
-} // extern "C"
+}
+
+#include "clipper.core.h"
+
+struct RustFriendlyPathsC
+{
+    size_t num_paths;
+    const PointC **paths;
+    const size_t *path_lengths;
+
+    RustFriendlyPathsC(size_t num_paths, const PointC **paths, const size_t *path_lengths);
+};
+
 #endif
 
-#endif // WRAPPER_H
+#endif
