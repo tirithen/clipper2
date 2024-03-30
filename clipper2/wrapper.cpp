@@ -5,19 +5,13 @@ extern "C"
 {
 #endif
 
-    // Forward declaration of conversion functions
-    Clipper2Lib::Paths64 convert_to_paths64(const PointC *points, size_t num_paths, const size_t *path_sizes);
+    Clipper2Lib::Paths64 convert_to_paths64(const PathsC *paths);
     PathsC *convert_from_paths64(const Clipper2Lib::Paths64 &paths);
 
-    PathsC *union_c(const PointC *points, size_t num_paths, const size_t *path_sizes, FillRuleC fillrule)
+    PathsC *union_c(const PathsC *subjects, FillRuleC fillrule)
     {
-        // Convert from C to C++ types
-        Clipper2Lib::Paths64 subjects = convert_to_paths64(points, num_paths, path_sizes);
-
-        // Perform the union operation
-        Clipper2Lib::Paths64 result = Clipper2Lib::Union(subjects, static_cast<Clipper2Lib::FillRule>(fillrule));
-
-        // Convert back to C types
+        Clipper2Lib::Paths64 subjects64 = convert_to_paths64(subjects);
+        Clipper2Lib::Paths64 result = Clipper2Lib::Union(subjects64, static_cast<Clipper2Lib::FillRule>(fillrule));
         return convert_from_paths64(result);
     }
 
@@ -26,29 +20,43 @@ extern "C"
         delete paths;
     }
 
+    const Point *get_points(const PathsC *paths)
+    {
+        return paths->points.data();
+    }
+
+    const size_t *get_path_starts(const PathsC *paths)
+    {
+        return paths->path_starts.data();
+    }
+
+    size_t get_num_paths(const PathsC *paths)
+    {
+        return paths->num_paths;
+    }
 #ifdef __cplusplus
-} // extern "C"
+}
 #endif
 
 #ifdef __cplusplus
 
-Clipper2Lib::Paths64 convert_to_paths64(const PointC *points, size_t num_paths, const size_t *path_sizes)
+Clipper2Lib::Paths64 convert_to_paths64(const PathsC *paths)
 {
-    Clipper2Lib::Paths64 paths;
-    paths.reserve(num_paths);
+    Clipper2Lib::Paths64 result;
+    result.reserve(paths->num_paths);
     size_t current_index = 0;
 
-    for (size_t i = 0; i < num_paths; ++i)
+    for (size_t i = 0; i < paths->num_paths; ++i)
     {
-        paths.push_back(Clipper2Lib::Path64());
-        for (size_t j = 0; j < path_sizes[i]; ++j)
+        result.push_back(Clipper2Lib::Path64());
+        for (size_t j = 0; j < paths->path_starts[i]; ++j)
         {
-            const auto &p = points[current_index + j];
-            paths.back().emplace_back(p.x, p.y);
+            const auto &p = paths->points[current_index + j];
+            result.back().emplace_back(p.x, p.y);
         }
-        current_index += path_sizes[i];
+        current_index += paths->path_starts[i];
     }
-    return paths;
+    return result;
 }
 
 PathsC *convert_from_paths64(const Clipper2Lib::Paths64 &paths)
@@ -71,4 +79,4 @@ PathsC *convert_from_paths64(const Clipper2Lib::Paths64 &paths)
     return result;
 }
 
-#endif // __cplusplus
+#endif

@@ -35,10 +35,14 @@ fn main() {
     {
         let bindings = bindgen::Builder::default()
             .header("clipper2/wrapper.h")
+            .allowlist_type("Point")
+            .allowlist_type("PathsC")
             .allowlist_type("FillRuleC")
-            .allowlist_type("PointC")
             .allowlist_function("union_c")
             .allowlist_function("free_paths_c")
+            .allowlist_function("get_points")
+            .allowlist_function("get_path_starts")
+            .allowlist_function("get_num_paths")
             .size_t_is_usize(true)
             .generate()
             .expect("unable to generate bindings");

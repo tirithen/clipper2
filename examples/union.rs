@@ -1,33 +1,20 @@
-use clipper2::{Path, PathType, Polygon, Polygons, Vertex};
+use clipper2::{union, FillRule, Paths};
 
 fn main() {
     let path1 = vec![
-        [100, 0],
-        [1000, 0],
-        [1000, 1000],
-        [0, 1000],
+        [1.0, 0.0],
+        [10.0, 0.0],
+        [10.0, 10.0],
+        [0.0, 10.0],
     ];
     let path2 = vec![
-        [500, 500],
-        [1500, 500],
-        [1500, 1500],
-        [500, 1500],
+        [5.0, 5.0],
+        [15.0, 5.0],
+        [15.0, 15.0],
+        [5.0, 15.0],
     ];
 
-    let output = clipper2::union(vec![path1, path2], FillRule::NonZero);
-    println!(
-        "Vertices: {}",
-        output
-            .polygons()
-            .first()
-            .unwrap()
-            .paths()
-            .first()
-            .unwrap()
-            .vertices()
-            .iter()
-            .map(|v| format!("({:.1}, {:.1})", v.x(), v.y()))
-            .collect::<Vec<_>>()
-            .join(", ")
-    );
+    let output = union(&Paths::from(vec![path1, path2]), FillRule::NonZero);
+
+    println!("Points: {:?}", output.to_vec());
 }

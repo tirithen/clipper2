@@ -2,33 +2,33 @@
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct PointC {
+pub struct Point {
     pub x: i64,
     pub y: i64,
 }
 #[test]
-fn bindgen_test_layout_PointC() {
-    const UNINIT: ::std::mem::MaybeUninit<PointC> = ::std::mem::MaybeUninit::uninit();
+fn bindgen_test_layout_Point() {
+    const UNINIT: ::std::mem::MaybeUninit<Point> = ::std::mem::MaybeUninit::uninit();
     let ptr = UNINIT.as_ptr();
     assert_eq!(
-        ::std::mem::size_of::<PointC>(),
+        ::std::mem::size_of::<Point>(),
         16usize,
-        concat!("Size of: ", stringify!(PointC))
+        concat!("Size of: ", stringify!(Point))
     );
     assert_eq!(
-        ::std::mem::align_of::<PointC>(),
+        ::std::mem::align_of::<Point>(),
         8usize,
-        concat!("Alignment of ", stringify!(PointC))
+        concat!("Alignment of ", stringify!(Point))
     );
     assert_eq!(
         unsafe { ::std::ptr::addr_of!((*ptr).x) as usize - ptr as usize },
         0usize,
-        concat!("Offset of field: ", stringify!(PointC), "::", stringify!(x))
+        concat!("Offset of field: ", stringify!(Point), "::", stringify!(x))
     );
     assert_eq!(
         unsafe { ::std::ptr::addr_of!((*ptr).y) as usize - ptr as usize },
         8usize,
-        concat!("Offset of field: ", stringify!(PointC), "::", stringify!(y))
+        concat!("Offset of field: ", stringify!(Point), "::", stringify!(y))
     );
 }
 pub const FillRuleC_EvenOdd: FillRuleC = 0;
@@ -42,13 +42,17 @@ pub struct PathsC {
     _unused: [u8; 0],
 }
 extern "C" {
-    pub fn union_c(
-        points: *const PointC,
-        num_paths: usize,
-        path_sizes: *const usize,
-        fillrule: FillRuleC,
-    ) -> *mut PathsC;
+    pub fn union_c(subjects: *const PathsC, fillrule: FillRuleC) -> *mut PathsC;
 }
 extern "C" {
     pub fn free_paths_c(paths: *mut PathsC);
+}
+extern "C" {
+    pub fn get_points(paths: *const PathsC) -> *const Point;
+}
+extern "C" {
+    pub fn get_path_starts(paths: *const PathsC) -> *const usize;
+}
+extern "C" {
+    pub fn get_num_paths(paths: *const PathsC) -> usize;
 }
