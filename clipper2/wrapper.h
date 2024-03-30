@@ -9,13 +9,12 @@ extern "C"
 {
 #endif
 
-    typedef struct PointC
+    typedef struct
     {
-        int64_t x;
-        int64_t y;
+        int64_t x, y;
     } PointC;
 
-    typedef enum FillRuleC
+    typedef enum
     {
         EvenOdd,
         NonZero,
@@ -23,29 +22,28 @@ extern "C"
         Negative
     } FillRuleC;
 
-    typedef struct RustFriendlyPathsC RustFriendlyPathsC;
+    // Forward declaration. No need for "struct" tag here in typedef.
+    typedef struct PathsC PathsC;
 
-    RustFriendlyPathsC *union_c(const RustFriendlyPathsC *subjects, FillRuleC fillrule);
-    RustFriendlyPathsC *create_rust_friendly_paths_c(size_t num_paths, const PointC **paths, const size_t *path_lengths);
-    const PointC **get_rust_paths_ptr_c(const RustFriendlyPathsC *rustFriendlyPathsC);
-    const size_t *get_rust_path_lengths_ptr_c(const RustFriendlyPathsC *rustFriendlyPathsC);
-    size_t get_rust_num_paths_c(const RustFriendlyPathsC *rustFriendlyPathsC);
-    void free_rust_friendly_paths_c(RustFriendlyPathsC *paths);
+    PathsC *union_c(const PointC *points, size_t num_paths, const size_t *path_sizes, FillRuleC fillrule);
+    void free_paths_c(PathsC *paths);
 
 #ifdef __cplusplus
-}
+} // extern "C"
+#endif
 
-#include "clipper.core.h"
+#ifdef __cplusplus
+#include <vector>
+#include "clipper.h"
 
-struct RustFriendlyPathsC
+// Define PathsC struct in the C++ section only
+struct PathsC
 {
+    std::vector<PointC> points;      // Flattened vector of points
+    std::vector<size_t> path_starts; // Starting index of each path in points vector
     size_t num_paths;
-    const PointC **paths;
-    const size_t *path_lengths;
-
-    RustFriendlyPathsC(size_t num_paths, const PointC **paths, const size_t *path_lengths);
 };
 
-#endif
+#endif // __cplusplus
 
-#endif
+#endif // WRAPPER_H

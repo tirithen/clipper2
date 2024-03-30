@@ -35,14 +35,10 @@ fn main() {
     {
         let bindings = bindgen::Builder::default()
             .header("clipper2/wrapper.h")
-            .allowlist_type("RustFriendlyPathsC")
             .allowlist_type("FillRuleC")
             .allowlist_type("PointC")
             .allowlist_function("union_c")
-            .allowlist_function("get_rust_paths_ptr_c")
-            .allowlist_function("get_rust_path_lengths_ptr_c")
-            .allowlist_function("get_rust_num_paths_c")
-            .allowlist_function("free_rust_friendly_paths_c")
+            .allowlist_function("free_paths_c")
             .size_t_is_usize(true)
             .generate()
             .expect("unable to generate bindings");

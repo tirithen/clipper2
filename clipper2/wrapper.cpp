@@ -1,79 +1,74 @@
 #include "wrapper.h"
-#include "clipper.core.h"
-#include "clipper.h"
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    // Forward declaration of conversion functions
+    Clipper2Lib::Paths64 convert_to_paths64(const PointC *points, size_t num_paths, const size_t *path_sizes);
+    PathsC *convert_from_paths64(const Clipper2Lib::Paths64 &paths);
+
+    PathsC *union_c(const PointC *points, size_t num_paths, const size_t *path_sizes, FillRuleC fillrule)
+    {
+        // Convert from C to C++ types
+        Clipper2Lib::Paths64 subjects = convert_to_paths64(points, num_paths, path_sizes);
+
+        // Perform the union operation
+        Clipper2Lib::Paths64 result = Clipper2Lib::Union(subjects, static_cast<Clipper2Lib::FillRule>(fillrule));
+
+        // Convert back to C types
+        return convert_from_paths64(result);
+    }
+
+    void free_paths_c(PathsC *paths)
+    {
+        delete paths;
+    }
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #ifdef __cplusplus
 
-RustFriendlyPathsC::RustFriendlyPathsC(size_t num_paths, const PointC **paths, const size_t *path_lengths)
-    : num_paths(num_paths), paths(paths), path_lengths(path_lengths) {}
-
-Clipper2Lib::Paths64 convert_to_paths64(const RustFriendlyPathsC *subjects)
+Clipper2Lib::Paths64 convert_to_paths64(const PointC *points, size_t num_paths, const size_t *path_sizes)
 {
     Clipper2Lib::Paths64 paths;
-    for (size_t i = 0; i < subjects->num_paths; ++i)
+    paths.reserve(num_paths);
+    size_t current_index = 0;
+
+    for (size_t i = 0; i < num_paths; ++i)
     {
-        paths.emplace_back(subjects->paths[i], subjects->paths[i] + subjects->path_lengths[i]);
+        paths.push_back(Clipper2Lib::Path64());
+        for (size_t j = 0; j < path_sizes[i]; ++j)
+        {
+            const auto &p = points[current_index + j];
+            paths.back().emplace_back(p.x, p.y);
+        }
+        current_index += path_sizes[i];
     }
     return paths;
 }
 
-RustFriendlyPathsC *convert_from_paths64(const Clipper2Lib::Paths64 &paths)
+PathsC *convert_from_paths64(const Clipper2Lib::Paths64 &paths)
 {
-    size_t size = paths.size();
-    auto **tempPaths = new const PointC *[size];
-    auto *tempPathLengths = new size_t[size];
+    auto *result = new PathsC;
+    result->num_paths = paths.size();
+    result->path_starts.resize(paths.size());
 
-    for (size_t i = 0; i < size; ++i)
+    size_t total_points = 0;
+    for (const auto &path : paths)
     {
-        tempPathLengths[i] = paths[i].size();
-        // tempPaths[i] = const_cast<PointC *>(paths[i].data());
-        tempPaths[i] = reinterpret_cast<const PointC *>(&paths[i]);
-    }
-
-    auto *rustFriendlyPathsC = new RustFriendlyPathsC(size, tempPaths, tempPathLengths);
-    return rustFriendlyPathsC;
-}
-
-#endif
-
-extern "C"
-{
-    RustFriendlyPathsC *union_c(const RustFriendlyPathsC *subjects, FillRuleC fillrule)
-    {
-        Clipper2Lib::FillRule cppFillRule = static_cast<Clipper2Lib::FillRule>(fillrule);
-        Clipper2Lib::Paths64 subjects_cpp = convert_to_paths64(subjects);
-        Clipper2Lib::Paths64 result_cpp = Clipper2Lib::Union(subjects_cpp, cppFillRule);
-        return convert_from_paths64(result_cpp);
-    }
-
-    RustFriendlyPathsC *create_rust_friendly_paths_c(size_t num_paths, const PointC **paths, const size_t *path_lengths)
-    {
-        return new RustFriendlyPathsC(num_paths, paths, path_lengths);
-    }
-
-    const PointC **get_rust_paths_ptr_c(const RustFriendlyPathsC *rustFriendlyPathsC)
-    {
-        return rustFriendlyPathsC->paths;
-    }
-
-    const size_t *get_rust_path_lengths_ptr_c(const RustFriendlyPathsC *rustFriendlyPathsC)
-    {
-        return rustFriendlyPathsC->path_lengths;
-    }
-
-    size_t get_rust_num_paths_c(const RustFriendlyPathsC *rustFriendlyPathsC)
-    {
-        return rustFriendlyPathsC->num_paths;
-    }
-
-    void free_rust_friendly_paths_c(RustFriendlyPathsC *paths)
-    {
-        for (size_t i = 0; i < paths->num_paths; ++i)
+        result->path_starts.push_back(total_points);
+        for (const auto &point : path)
         {
-            delete[] paths->paths[i];
+            result->points.push_back({point.x, point.y});
+            ++total_points;
         }
-        delete[] paths->paths;
-        delete[] paths->path_lengths;
-        delete paths;
     }
+
+    return result;
 }
+
+#endif // __cplusplus
