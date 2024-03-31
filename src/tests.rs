@@ -17,7 +17,7 @@ fn test_union() {
     let shape1 = vec![(1.0, 1.0), (1.0, 5.0), (5.0, 5.0), (5.0, 1.0)];
     let shape2 = vec![(2.0, 2.0), (2.0, 4.0), (8.0, 4.0), (8.0, 2.0)];
     let shape3 = vec![(20.0, 20.0), (20.0, 40.0), (80.0, 40.0), (80.0, 20.0)];
-    let shapes = vec![shape1, shape2 shape3];
+    let shapes = vec![shape1, shape2, shape3];
 
     let paths = Paths::from(shapes);
     let result = union(&paths, FillRule::NonZero);
