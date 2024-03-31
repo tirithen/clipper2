@@ -1,15 +1,27 @@
 use crate::*;
 
 #[test]
-fn test_union_from_vec_of_vec() {
+fn test_paths_from_into() {
     let shape1 = vec![(1.0, 1.0), (1.0, 5.0), (5.0, 5.0), (5.0, 1.0)];
-    let shape2 = vec![(2.0, 2.0), (2.0, 4.0), (4.0, 4.0), (4.0, 2.0)];
-    let input = vec![shape1.clone(), shape2];
+    let shape2 = vec![(2.0, 2.0), (2.0, 4.0), (8.0, 4.0), (8.0, 2.0)];
+    let shapes = vec![shape1.clone(), shape2];
 
-    let paths = Paths::from(input);
+    let paths = Paths::from(shapes.clone());
+    let paths_vec: Vec<Vec<(f64, f64)>> = paths.into();
 
-    let result = union(&paths, FillRule::EvenOdd);
+    assert_eq!(paths_vec, shapes);
+}
 
-    assert_eq!(result.iter().count(), 1);
-    assert_eq!(result.to_vec(), Paths::from(shape1).to_vec());
+#[test]
+fn test_union() {
+    let shape1 = vec![(1.0, 1.0), (1.0, 5.0), (5.0, 5.0), (5.0, 1.0)];
+    let shape2 = vec![(2.0, 2.0), (2.0, 4.0), (8.0, 4.0), (8.0, 2.0)];
+    // let shape3 = vec![(20.0, 20.0), (20.0, 40.0), (80.0, 40.0), (80.0, 20.0)];
+    let shapes = vec![shape1, shape2, /*shape3*/];
+
+    let paths = Paths::from(shapes);
+    let result = union(&paths, FillRule::NonZero);
+
+    assert_eq!(result.iter().count(), 2);
+    assert_eq!(result.to_vec(), Paths::from(vec![vec![(1.0, 1.0), (1.0, 5.0), (5.0, 5.0), (5.0, 1.0)]]).to_vec());
 }

@@ -1,54 +1,5 @@
 use std::slice;
 
-const PRECISION_MULTIPLIER: f64 = 100.0;
-
-impl Point {
-    pub fn new(x: f64, y: f64) -> Point {
-        Point {
-            x: (x * PRECISION_MULTIPLIER) as i64,
-            y: (y * PRECISION_MULTIPLIER) as i64,
-        }
-    }
-
-    pub fn from_scaled(x: i64, y: i64) -> Point {
-        Point { x, y }
-    }
-
-    pub fn x(&self) -> f64 {
-        self.x as f64 / PRECISION_MULTIPLIER
-    }
-
-    pub fn y(&self) -> f64 {
-        self.y as f64 / PRECISION_MULTIPLIER
-    }
-
-    pub fn x_scaled(&self) -> i64 {
-        self.x
-    }
-
-    pub fn y_scaled(&self) -> i64 {
-        self.y
-    }
-}
-
-impl From<(f64, f64)> for Point {
-    fn from((x, y): (f64, f64)) -> Self {
-        Point::new(x, y)
-    }
-}
-
-impl From<[f64; 2]> for Point {
-    fn from([x, y]: [f64; 2]) -> Self {
-        Point::new(x, y)
-    }
-}
-
-impl PartialEq for Point {
-    fn eq(&self, other: &Self) -> bool {
-        self.x == other.x && self.y == other.y
-    }
-}
-
 #[derive(Debug, Clone)]
 pub struct Paths {
     points: *const Point,
@@ -123,6 +74,18 @@ impl From<Paths> for Vec<Vec<Point>> {
     }
 }
 
+impl From<Paths> for Vec<Vec<(f64, f64)>> {
+    fn from(vec: Paths) -> Self {
+        vec.iter().map(|path| path.iter().map(|point| (point.x(), point.y())).collect()).collect()
+    }
+}
+
+impl From<Paths> for Vec<Vec<[f64; 2]>> {
+    fn from(vec: Paths) -> Self {
+        vec.iter().map(|path| path.iter().map(|point| [point.x(), point.y()]).collect()).collect()
+    }
+}
+
 impl From<Vec<Vec<Point>>> for Paths {
     fn from(vec: Vec<Vec<Point>>) -> Self {
         Paths::from_vec(vec)
@@ -146,7 +109,7 @@ impl From<Vec<Vec<(f64, f64)>>> for Paths {
 impl From<Vec<Vec<[f64; 2]>>> for Paths {
     fn from(vec: Vec<Vec<[f64; 2]>>) -> Self {
         let paths: Vec<Vec<Point>> = vec.into_iter().map(|path|
-            path.into_iter().map(|[x, y]| Point::from((x, y))).collect()
+            path.into_iter().map(Point::from).collect()
         ).collect();
         Paths::from_vec(paths)
     }
@@ -167,7 +130,7 @@ impl From<Vec<(f64, f64)>> for Paths {
 
 impl From<Vec<[f64; 2]>> for Paths {
     fn from(vec: Vec<[f64; 2]>) -> Self {
-        let points: Vec<Point> = vec.into_iter().map(|[x, y]| Point::from((x, y))).collect();
+        let points: Vec<Point> = vec.into_iter().map(Point::from).collect();
         Paths::from_vec(vec![points])
     }
 }

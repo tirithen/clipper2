@@ -12,3 +12,4 @@ include!(concat!(
 ));
 
 include!("path.rs");
+include!("point.rs");
