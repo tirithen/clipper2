@@ -13,7 +13,7 @@ fn test_paths_from_into() {
 }
 
 #[test]
-fn test_union() {
+fn test_union_from_tuples() {
     let shape1 = vec![(1.0, 1.0), (1.0, 5.0), (5.0, 5.0), (5.0, 1.0)];
     let shape2 = vec![(2.0, 2.0), (2.0, 4.0), (8.0, 4.0), (8.0, 2.0)];
     let shape3 = vec![(20.0, 20.0), (20.0, 40.0), (80.0, 40.0), (80.0, 20.0)];
@@ -25,6 +25,38 @@ fn test_union() {
     assert_eq!(result.iter().count(), 2);
     assert_eq!(
         result.to_vec(),
-        Paths::from(vec![vec![(1.0, 1.0) /* fix expected output once there are no more crashes */]]).to_vec()
+        Paths::from(vec![vec![
+            (1.0, 1.0) /* fix expected output once there are no more crashes */
+        ]])
+        .to_vec()
+    );
+}
+
+#[test]
+fn test_union_from_points() {
+    let shape1 = vec![
+        Point::new(1.0, 1.0),
+        Point::new(1.0, 5.0),
+        Point::new(5.0, 5.0),
+        Point::new(5.0, 1.0),
+    ];
+    let shape2 = vec![
+        Point::new(2.0, 2.0),
+        Point::new(2.0, 4.0),
+        Point::new(8.0, 4.0),
+        Point::new(8.0, 2.0),
+    ];
+    let shapes = vec![shape1, shape2];
+
+    let paths = Paths::from_vec(shapes);
+    let result = union(&paths, FillRule::NonZero);
+
+    assert_eq!(result.iter().count(), 2);
+    assert_eq!(
+        result.to_vec(),
+        Paths::from(vec![vec![
+            (1.0, 1.0) /* fix expected output once there are no more crashes */
+        ]])
+        .to_vec()
     );
 }

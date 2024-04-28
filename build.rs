@@ -42,7 +42,9 @@ fn main() {
             .allowlist_function("free_paths_c")
             .allowlist_function("get_points")
             .allowlist_function("get_path_starts")
+            .allowlist_function("get_path_capacities")
             .allowlist_function("get_num_paths")
+            .allowlist_function("get_num_paths_capacity")
             .size_t_is_usize(true)
             .generate()
             .expect("unable to generate bindings");

@@ -54,5 +54,11 @@ extern "C" {
     pub fn get_path_starts(paths: *const PathsC) -> *const usize;
 }
 extern "C" {
+    pub fn get_path_capacities(paths: *const PathsC) -> *const usize;
+}
+extern "C" {
     pub fn get_num_paths(paths: *const PathsC) -> usize;
+}
+extern "C" {
+    pub fn get_num_paths_capacity(paths: *const PathsC) -> usize;
 }

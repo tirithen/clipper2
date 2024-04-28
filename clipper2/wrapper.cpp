@@ -30,9 +30,19 @@ extern "C"
         return paths->path_starts.data();
     }
 
+    const size_t *get_path_capacities(const PathsC *paths)
+    {
+        return paths->path_capacities.data();
+    }
+
     size_t get_num_paths(const PathsC *paths)
     {
         return paths->num_paths;
+    }
+
+    size_t get_num_paths_capacity(const PathsC *paths)
+    {
+        return paths->num_paths_capacity;
     }
 #ifdef __cplusplus
 }

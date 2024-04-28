@@ -1,10 +1,13 @@
 use std::slice;
 
+#[repr(C)]
 #[derive(Debug, Clone)]
 pub struct Paths {
     points: *const Point,
     path_starts: *const usize,
+    path_capacities: *const usize,
     num_paths: usize,
+    num_paths_capacity: usize,
 }
 
 impl Paths {
@@ -43,14 +46,18 @@ impl Paths {
         unsafe {
             let points = get_points(ptr);
             let path_starts = get_path_starts(ptr);
+            let path_capacities = get_path_capacities(ptr);
             let num_paths = get_num_paths(ptr);
+            let num_paths_capacity = get_num_paths_capacity(ptr);
 
             free_paths_c(ptr);
 
             Paths {
                 points,
                 path_starts,
+                path_capacities,
                 num_paths,
+                num_paths_capacity,
             }
         }
     }
@@ -76,13 +83,17 @@ impl From<Paths> for Vec<Vec<Point>> {
 
 impl From<Paths> for Vec<Vec<(f64, f64)>> {
     fn from(vec: Paths) -> Self {
-        vec.iter().map(|path| path.iter().map(|point| (point.x(), point.y())).collect()).collect()
+        vec.iter()
+            .map(|path| path.iter().map(|point| (point.x(), point.y())).collect())
+            .collect()
     }
 }
 
 impl From<Paths> for Vec<Vec<[f64; 2]>> {
     fn from(vec: Paths) -> Self {
-        vec.iter().map(|path| path.iter().map(|point| [point.x(), point.y()]).collect()).collect()
+        vec.iter()
+            .map(|path| path.iter().map(|point| [point.x(), point.y()]).collect())
+            .collect()
     }
 }
 
@@ -96,11 +107,7 @@ impl From<Vec<Vec<(f64, f64)>>> for Paths {
     fn from(vec: Vec<Vec<(f64, f64)>>) -> Self {
         let vec_of_vec_points: Vec<Vec<Point>> = vec
             .into_iter()
-            .map(|inner_vec|
-                inner_vec.into_iter()
-                    .map(Point::from)
-                    .collect()
-            )
+            .map(|inner_vec| inner_vec.into_iter().map(Point::from).collect())
             .collect();
         Paths::from_vec(vec_of_vec_points)
     }
@@ -108,9 +115,10 @@ impl From<Vec<Vec<(f64, f64)>>> for Paths {
 
 impl From<Vec<Vec<[f64; 2]>>> for Paths {
     fn from(vec: Vec<Vec<[f64; 2]>>) -> Self {
-        let paths: Vec<Vec<Point>> = vec.into_iter().map(|path|
-            path.into_iter().map(Point::from).collect()
-        ).collect();
+        let paths: Vec<Vec<Point>> = vec
+            .into_iter()
+            .map(|path| path.into_iter().map(Point::from).collect())
+            .collect();
         Paths::from_vec(paths)
     }
 }
@@ -144,7 +152,11 @@ impl Drop for Paths {
             let path_starts_capacity = self.num_paths + 1;
 
             let _ = Vec::from_raw_parts(self.points as *mut Point, points_len, points_capacity);
-            let _ = Vec::from_raw_parts(self.path_starts as *mut usize, path_starts_len, path_starts_capacity);
+            let _ = Vec::from_raw_parts(
+                self.path_starts as *mut usize,
+                path_starts_len,
+                path_starts_capacity,
+            );
         }
     }
 }

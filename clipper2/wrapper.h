@@ -29,7 +29,9 @@ extern "C"
 
     const Point *get_points(const PathsC *paths);
     const size_t *get_path_starts(const PathsC *paths);
+    const size_t *get_path_capacities(const PathsC *paths);
     size_t get_num_paths(const PathsC *paths);
+    size_t get_num_paths_capacity(const PathsC *paths);
 
 #ifdef __cplusplus
 }
@@ -43,7 +45,9 @@ struct PathsC
 {
     std::vector<Point> points;
     std::vector<size_t> path_starts;
+    std::vector<size_t> path_capacities;
     size_t num_paths;
+    size_t num_paths_capacity;
 };
 
 #endif
