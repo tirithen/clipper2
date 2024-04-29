@@ -156,6 +156,12 @@ impl<P: PointScaler> From<Vec<[f64; 2]>> for Paths<P> {
     }
 }
 
+impl<P: PointScaler> From<Vec<Path<P>>> for Paths<P> {
+    fn from(points: Vec<Path<P>>) -> Self {
+        Paths::<P>::new(points)
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
