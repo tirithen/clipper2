@@ -1,7 +1,4 @@
-use clipper2c_sys::{
-    clipper_path64_get_point, clipper_path64_length, clipper_path64_of_points, clipper_path64_size,
-    ClipperPath64, ClipperPoint64,
-};
+use clipper2c_sys::{clipper_path64_of_points, clipper_path64_size, ClipperPath64, ClipperPoint64};
 
 use crate::{malloc, Centi, Point, PointScaler};
 
@@ -40,16 +37,6 @@ impl<P: PointScaler> Path<P> {
             items: self,
             index: 0,
         }
-    }
-
-    pub(crate) fn from_clipperpath64(ptr: *mut ClipperPath64) -> Self {
-        let points = unsafe {
-            let len: i32 = clipper_path64_length(ptr).try_into().unwrap();
-            (0..len)
-                .map(|i| clipper_path64_get_point(ptr, i).into())
-                .collect()
-        };
-        Self::new(points)
     }
 
     pub(crate) unsafe fn to_clipperpath64(&self) -> *mut ClipperPath64 {

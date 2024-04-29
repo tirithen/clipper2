@@ -7,9 +7,9 @@ use clipper2c_sys::{
     ClipperEndType_ROUND_END, ClipperEndType_SQUARE_END, ClipperFillRule, ClipperFillRule_EVEN_ODD,
     ClipperFillRule_NEGATIVE, ClipperFillRule_NON_ZERO, ClipperFillRule_POSITIVE, ClipperJoinType,
     ClipperJoinType_BEVEL_JOIN, ClipperJoinType_MITER_JOIN, ClipperJoinType_ROUND_JOIN,
-    ClipperJoinType_SQUARE_JOIN, ClipperPathType, ClipperPathType_CLIP, ClipperPathType_SUBJECT,
-    ClipperPointInPolygonResult, ClipperPointInPolygonResult_IS_INSIDE,
-    ClipperPointInPolygonResult_IS_ON, ClipperPointInPolygonResult_IS_OUTSIDE,
+    ClipperJoinType_SQUARE_JOIN, ClipperPointInPolygonResult,
+    ClipperPointInPolygonResult_IS_INSIDE, ClipperPointInPolygonResult_IS_ON,
+    ClipperPointInPolygonResult_IS_OUTSIDE,
 };
 
 /// The Clipper Library supports 4 filling rules: Even-Odd, Non-Zero, Positive
@@ -66,6 +66,7 @@ pub enum FillRule {
 /// For more details see [ClipType](https://www.angusj.com/clipper2/Docs/Units/Clipper/Types/ClipType.htm).
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub(crate) enum ClipType {
+    #[allow(dead_code)]
     None,
     Intersection,
     Union,
@@ -142,12 +143,6 @@ pub enum PointInPolygonResult {
     IsOutside,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub(crate) enum PathType {
-    Subject,
-    Clip,
-}
-
 impl From<ClipType> for ClipperClipType {
     fn from(value: ClipType) -> Self {
         match value {
@@ -214,15 +209,6 @@ impl From<ClipperPointInPolygonResult> for PointInPolygonResult {
                 "Invalid ClipperPointInPolygonResult value {}",
                 value as usize
             ),
-        }
-    }
-}
-
-impl From<PathType> for ClipperPathType {
-    fn from(value: PathType) -> Self {
-        match value {
-            PathType::Subject => ClipperPathType_SUBJECT,
-            PathType::Clip => ClipperPathType_CLIP,
         }
     }
 }

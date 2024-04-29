@@ -1,11 +1,9 @@
 use std::marker::PhantomData;
 
 use clipper2c_sys::{
-    clipper_clipper64, clipper_clipper64_add_clip, clipper_clipper64_add_open_subject,
-    clipper_clipper64_add_subject, clipper_clipper64_clear, clipper_clipper64_execute,
-    clipper_clipper64_get_preserve_collinear, clipper_clipper64_get_reverse_solution,
-    clipper_clipper64_set_preserve_collinear, clipper_clipper64_set_reverse_solution,
-    clipper_clipper64_size, clipper_delete_clipper64, clipper_delete_paths64, ClipperClipper64,
+    clipper_clipper64, clipper_clipper64_add_clip, clipper_clipper64_add_subject,
+    clipper_clipper64_execute, clipper_clipper64_size, clipper_delete_clipper64,
+    clipper_delete_paths64, ClipperClipper64,
 };
 
 use crate::{malloc, Centi, ClipType, FillRule, Paths, PointScaler};
@@ -24,34 +22,6 @@ impl<P: PointScaler> Clipper<P> {
         Self {
             ptr,
             _marker: PhantomData,
-        }
-    }
-
-    pub fn set_preserve_collinear(&self, value: bool) {
-        unsafe { clipper_clipper64_set_preserve_collinear(self.ptr, if value { 1 } else { 0 }) }
-    }
-
-    pub fn get_preserve_collinear(&self) -> bool {
-        unsafe { clipper_clipper64_get_preserve_collinear(self.ptr) == 1 }
-    }
-
-    pub fn set_reverse_solution(&self, value: bool) {
-        unsafe { clipper_clipper64_set_reverse_solution(self.ptr, if value { 1 } else { 0 }) }
-    }
-
-    pub fn get_reverse_solution(&self) -> bool {
-        unsafe { clipper_clipper64_get_reverse_solution(self.ptr) == 1 }
-    }
-
-    pub fn clear(&self) {
-        unsafe { clipper_clipper64_clear(self.ptr) }
-    }
-
-    pub fn add_open_subject(&self, open_subject: Paths<P>) {
-        unsafe {
-            let open_subject_ptr = open_subject.to_clipperpaths64();
-            clipper_clipper64_add_open_subject(self.ptr, open_subject_ptr);
-            clipper_delete_paths64(open_subject_ptr);
         }
     }
 
