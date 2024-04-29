@@ -4,12 +4,12 @@ use macroquad::prelude::*;
 
 mod helpers;
 
-#[macroquad::main("Union")]
+#[macroquad::main("Difference")]
 async fn main() {
     let path_a: Paths = vec![(0.2, 0.2), (6.0, 0.2), (6.0, 6.0), (0.2, 6.0)].into();
     let path_b: Paths = vec![(5.0, 5.0), (8.0, 5.0), (8.0, 8.0), (5.0, 8.0)].into();
 
-    let result = union(path_a.clone(), path_b.clone(), FillRule::default())
+    let result = difference(path_a.clone(), path_b.clone(), FillRule::default())
         .expect("Failed to run boolean operation");
 
     loop {

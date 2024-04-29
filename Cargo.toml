@@ -9,17 +9,22 @@ repository = "https://github.com/tirithen/clipper2"
 documentation = "https://docs.rs/clipper2/"
 description = "A polygon Clipping and Offsetting library for Rust."
 keywords = ["polygon", "boolean", "clip", "clipper", "clipper2"]
-categories = ["algorithms", "external-ffi-bindings"]
+categories = ["algorithms"]
 
 [features]
-default = []
-generate-bindings = ["bindgen"]
-update-bindings = ["generate-bindings"]
-glam = ["dep:glam"]
-
-[build-dependencies]
-bindgen = { version = "0.69", optional = true }
-cc = "1"
+default = ["doc-images"]
+doc-images = []
 
 [dependencies]
-glam = { version = "0.25", optional = true }
+libc = "0.2"
+clipper2c-sys = "0.1.0"
+thiserror = "1.0.59"
+embed-doc-image = "0.1"
+
+[dev-dependencies]
+macroquad = "0.4.5"
+
+[package.metadata.docs.rs]
+# docs.rs uses a nightly compiler, so by instructing it to use our `doc-images` feature we
+# ensure that it will render any images that we may have in inner attribute documentation.
+features = ["doc-images"]
