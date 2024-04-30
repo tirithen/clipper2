@@ -91,6 +91,24 @@ impl<P: PointScaler> Point<P> {
     /// The zero point.
     pub const ZERO: Self = Self(ClipperPoint64 { x: 0, y: 0 }, PhantomData);
 
+    /// The minimum value for a point.
+    pub const MIN: Self = Self(
+        ClipperPoint64 {
+            x: i64::MIN,
+            y: i64::MIN,
+        },
+        PhantomData,
+    );
+
+    /// The maximum value for a point.
+    pub const MAX: Self = Self(
+        ClipperPoint64 {
+            x: i64::MAX,
+            y: i64::MAX,
+        },
+        PhantomData,
+    );
+
     /// Create a new point.
     pub fn new(x: f64, y: f64) -> Self {
         Self(

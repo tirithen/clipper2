@@ -4,7 +4,7 @@ use clipper2c_sys::{
     ClipperPaths64,
 };
 
-use crate::{malloc, Centi, Path, Point, PointScaler};
+use crate::{malloc, Bounds, Centi, Path, Point, PointScaler};
 
 /// A collection of paths.
 ///
@@ -35,12 +35,54 @@ impl<P: PointScaler> Paths<P> {
         self.0.is_empty()
     }
 
+    /// Returns `true` if at least one of the paths contains a point
+    pub fn contains_points(&self) -> bool {
+        for path in &self.0 {
+            if !path.is_empty() {
+                return true;
+            }
+        }
+
+        false
+    }
+
     /// Returns an iterator over the paths in the paths.
     pub fn iter(&self) -> PathsIterator<P> {
         PathsIterator {
             items: self,
             index: 0,
         }
+    }
+
+    /// Returns the bounds for this path.
+    pub fn bounds(&self) -> Bounds {
+        let mut bounds = Bounds::minmax();
+
+        for p in &self.0 {
+            let b = p.bounds();
+            let min_x = b.min.x();
+            let min_y = b.min.y();
+            let max_x = b.max.x();
+            let max_y = b.max.y();
+
+            if min_x < bounds.min.x() {
+                bounds.min = Point::new(min_x, bounds.min.y());
+            }
+
+            if min_y < bounds.min.y() {
+                bounds.min = Point::new(bounds.min.x(), min_y);
+            }
+
+            if max_x > bounds.max.x() {
+                bounds.max = Point::new(max_x, bounds.max.y());
+            }
+
+            if max_y > bounds.max.y() {
+                bounds.max = Point::new(bounds.max.x(), max_y);
+            }
+        }
+
+        bounds
     }
 
     pub(crate) fn from_clipperpaths64(ptr: *mut ClipperPaths64) -> Self {
