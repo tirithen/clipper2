@@ -1,6 +1,6 @@
 use clipper2c_sys::{clipper_path64_of_points, clipper_path64_size, ClipperPath64, ClipperPoint64};
 
-use crate::{malloc, Centi, Point, PointScaler};
+use crate::{malloc, Bounds, Centi, Point, PointScaler};
 
 /// A collection of points.
 ///
@@ -31,12 +31,45 @@ impl<P: PointScaler> Path<P> {
         self.0.is_empty()
     }
 
+    /// Returns `true` if the path contains at least one point
+    pub fn contains_points(&self) -> bool {
+        self.is_empty()
+    }
+
     /// Returns an iterator over the points in the path.
     pub fn iter(&self) -> PathIterator<P> {
         PathIterator {
             items: self,
             index: 0,
         }
+    }
+
+    /// Returns the bounds for this path.
+    pub fn bounds(&self) -> Bounds {
+        let mut bounds = Bounds::minmax();
+
+        for p in &self.0 {
+            let x = p.x();
+            let y = p.y();
+
+            if x < bounds.min.x() {
+                bounds.min = Point::new(x, bounds.min.y());
+            }
+
+            if y < bounds.min.y() {
+                bounds.min = Point::new(bounds.min.x(), y);
+            }
+
+            if x > bounds.max.x() {
+                bounds.max = Point::new(x, bounds.max.y());
+            }
+
+            if y > bounds.max.y() {
+                bounds.max = Point::new(bounds.max.x(), y);
+            }
+        }
+
+        bounds
     }
 
     pub(crate) unsafe fn to_clipperpath64(&self) -> *mut ClipperPath64 {

@@ -37,6 +37,7 @@
 //! [examples](https://github.com/tirithen/clipper2/tree/main/examples)
 //! directory.
 
+mod bounds;
 mod clipper;
 mod operations;
 mod options;
@@ -44,6 +45,7 @@ mod path;
 mod paths;
 mod point;
 
+pub use crate::bounds::*;
 pub use crate::clipper::*;
 pub use crate::operations::*;
 pub use crate::options::*;
