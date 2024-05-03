@@ -19,10 +19,10 @@ doc-images = []
 libc = "0.2"
 clipper2c-sys = "0.1.0"
 thiserror = "1.0.59"
-embed-doc-image = "0.1"
 
 [dev-dependencies]
 macroquad = "0.4.5"
+embed-doc-image = "0.1"
 
 [package.metadata.docs.rs]
 # docs.rs uses a nightly compiler, so by instructing it to use our `doc-images` feature we

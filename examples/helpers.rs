@@ -29,6 +29,23 @@ pub fn draw_path(path: &Path, color: Color) {
     }
 }
 
+pub fn draw_paths_points(paths: &Paths, color: Color) {
+    for path in paths.iter() {
+        draw_path_points(path, color);
+    }
+}
+
+pub fn draw_path_points(path: &Path, color: Color) {
+    for point in path.iter() {
+        draw_circle(
+            point.x() as f32 * SCALE,
+            point.y() as f32 * SCALE,
+            6.0,
+            color,
+        );
+    }
+}
+
 pub fn circle_path(offset: (f64, f64), radius: f64, segments: usize) -> Paths {
     let mut points = vec![];
 

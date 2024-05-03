@@ -14,6 +14,7 @@
 //! * [inflate](inflate())
 //! * [intersect](intersect())
 //! * [point_in_polygon](point_in_polygon())
+//! * [simplify](simplify())
 //! * [union](union())
 //! * [xor](xor())
 //!
