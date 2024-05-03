@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.1](https://github.com/tirithen/clipper2/compare/v0.2.0...v0.2.1) (2024-05-03)
+
+
+### Features
+
+* add .offset(x, y) method to Path and Paths ([be676f5](https://github.com/tirithen/clipper2/commit/be676f5beebbe0b18e1422a3852bea30a856eb96))
+* add bounds struct to path/paths ([b17ccfd](https://github.com/tirithen/clipper2/commit/b17ccfd524c1bd5f16ae3d911cd1c71c04ce2802))
+* **Paths:** add from Vec<Path<P>> for Paths ([39ea7a1](https://github.com/tirithen/clipper2/commit/39ea7a1658ac0982f7043da2d428b12ac16e6333))
+* **simplify:** add simplify function ([418b98f](https://github.com/tirithen/clipper2/commit/418b98f54333db977460a2c931486f08f554fea2))
+
 ## [0.2.0](https://github.com/tirithen/clipper2/compare/v0.1.2...v0.2.0) (2024-04-29)
 
 
