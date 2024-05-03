@@ -51,9 +51,9 @@ mod test {
     #[test]
     fn test_simplify() {
         let path = vec![(0.0, 1.0), (0.1, 0.3), (1.0, 0.0), (1.3, 0.0), (2.0, 0.0)];
-        let expected_output = vec![vec![(0.0, 1.0), (2.0, 0.0)]];
+        let expected_output = vec![vec![(0.0, 1.0), (0.1, 0.3), (2.0, 0.0)]];
 
-        let output: Vec<Vec<(f64, f64)>> = simplify::<Centi>(path.into(), 1.0, true).into();
+        let output: Vec<Vec<(f64, f64)>> = simplify::<Centi>(path.into(), 0.2, true).into();
         assert_eq!(output, expected_output);
     }
 }
