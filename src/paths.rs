@@ -71,19 +71,19 @@ impl<P: PointScaler> Paths<P> {
             let max_y = b.max.y();
 
             if min_x < bounds.min.x() {
-                bounds.min = Point::new(bounds.min.x(), min_y);
-            }
-
-            if min_y < bounds.min.x() {
                 bounds.min = Point::new(min_x, bounds.min.y());
             }
 
-            if max_x < bounds.max.x() {
-                bounds.max = Point::new(bounds.max.x(), max_y);
+            if min_y < bounds.min.y() {
+                bounds.min = Point::new(bounds.min.x(), min_y);
             }
 
-            if max_y < bounds.max.y() {
+            if max_x > bounds.max.x() {
                 bounds.max = Point::new(max_x, bounds.max.y());
+            }
+
+            if max_y > bounds.max.y() {
+                bounds.max = Point::new(bounds.max.x(), max_y);
             }
         }
 
