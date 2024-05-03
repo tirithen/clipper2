@@ -54,6 +54,11 @@ impl<P: PointScaler> Paths<P> {
         }
     }
 
+    /// Construct a clone with each point offset with a x/y distance
+    pub fn offset(&self, x: f64, y: f64) -> Self {
+        Self::new(self.0.iter().map(|p| p.offset(x, y)).collect())
+    }
+
     /// Returns the bounds for this path.
     pub fn bounds(&self) -> Bounds {
         let mut bounds = Bounds::minmax();
