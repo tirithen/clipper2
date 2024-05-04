@@ -54,6 +54,34 @@ impl<P: PointScaler> Path<P> {
         )
     }
 
+    /// Construct a clone with each point x value flipped
+    pub fn flip_x(&self) -> Self {
+        let bounds = self.bounds();
+        let min_x = bounds.min.x();
+        let size_x = bounds.size().x();
+
+        Self::new(
+            self.0
+                .iter()
+                .map(|p| Point::<P>::new(size_x - (p.x() - min_x), p.y()))
+                .collect(),
+        )
+    }
+
+    /// Construct a clone with each point y value flipped
+    pub fn flip_y(&self) -> Self {
+        let bounds = self.bounds();
+        let min_y = bounds.min.y();
+        let size_y = bounds.size().y();
+
+        Self::new(
+            self.0
+                .iter()
+                .map(|p| Point::<P>::new(p.x(), size_y - (p.y() - min_y)))
+                .collect(),
+        )
+    }
+
     /// Returns the bounds for this path.
     pub fn bounds(&self) -> Bounds {
         let mut bounds = Bounds::minmax();

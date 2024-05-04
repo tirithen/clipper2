@@ -59,6 +59,16 @@ impl<P: PointScaler> Paths<P> {
         Self::new(self.0.iter().map(|p| p.offset(x, y)).collect())
     }
 
+    /// Construct a clone with each point x value flipped
+    pub fn flip_x(&self) -> Self {
+        Self::new(self.0.iter().map(|p| p.flip_x()).collect())
+    }
+
+    /// Construct a clone with each point y value flipped
+    pub fn flip_y(&self) -> Self {
+        Self::new(self.0.iter().map(|p| p.flip_y()).collect())
+    }
+
     /// Returns the bounds for this path.
     pub fn bounds(&self) -> Bounds {
         let mut bounds = Bounds::minmax();
