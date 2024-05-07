@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.2](https://github.com/tirithen/clipper2/compare/v0.2.1...v0.2.2) (2024-05-07)
+
+
+### Features
+
+* **path:** add .flip_x and .flip_y to path structs ([6323292](https://github.com/tirithen/clipper2/commit/6323292bd0514cb1eeb544c799fb472cf9b2cf90))
+* **path:** add .rotate(rad) method to Path/Paths ([150715a](https://github.com/tirithen/clipper2/commit/150715aeea21b2246efbbb99bff4b2f808fb120f))
+* **path:** add .scale(scale) method to Path/Paths ([447ed8d](https://github.com/tirithen/clipper2/commit/447ed8dbfd6e5da23e1789c9a16c7522d6a8ba83))
+* **path:** rename .offset(x,y) to .translate(x,y) ([06bcfb3](https://github.com/tirithen/clipper2/commit/06bcfb3d769e25e807d268e64110d09538c4662a))
+
+
+### Bug Fixes
+
+* **path:** keep path bounds centered during flip ([d87993e](https://github.com/tirithen/clipper2/commit/d87993e19d578872bc3f6df520f90fcaa736a47f))
+
 ### [0.2.1](https://github.com/tirithen/clipper2/compare/v0.2.0...v0.2.1) (2024-05-03)
 
 
