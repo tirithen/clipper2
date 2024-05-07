@@ -7,7 +7,7 @@ mod helpers;
 #[macroquad::main("Simplify")]
 async fn main() {
     let path: Paths = vec![(1.0, 2.0), (1.0, 2.5), (1.2, 4.0), (1.8, 6.0)].into();
-    let path_simplified = simplify(path.offset(3.0, 0.0), 0.5, false);
+    let path_simplified = simplify(path.translate(3.0, 0.0), 0.5, false);
 
     loop {
         clear_background(BLACK);

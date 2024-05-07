@@ -10,8 +10,7 @@ async fn main() {
     let path_b: Paths = vec![(5.0, 5.0), (8.0, 5.0), (8.0, 8.0), (5.0, 8.0)].into();
 
     let result = intersect::<Centi>(path_a.clone(), path_b.clone(), FillRule::default())
-        .expect("Failed to run boolean operation")
-        .into();
+        .expect("Failed to run boolean operation");
 
     loop {
         clear_background(BLACK);
