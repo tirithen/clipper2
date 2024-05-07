@@ -78,6 +78,26 @@ impl<P: PointScaler> Path<P> {
         )
     }
 
+    /// Construct a rotated clone of the path with the origin at the path center
+    pub fn rotate(&self, radians: f64) -> Self {
+        let bounds = self.bounds();
+        let center = bounds.center();
+        let cos = radians.cos();
+        let sin = radians.sin();
+
+        Self::new(
+            self.0
+                .iter()
+                .map(|p| {
+                    Point::<P>::new(
+                        (center.x() - p.x()) * cos - (center.y() - p.y()) * sin + center.x(),
+                        (center.x() - p.x()) * sin + (center.y() - p.y()) * cos + center.y(),
+                    )
+                })
+                .collect(),
+        )
+    }
+
     /// Construct a clone with each point x value flipped
     pub fn flip_x(&self) -> Self {
         let bounds = self.bounds();

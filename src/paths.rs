@@ -70,6 +70,11 @@ impl<P: PointScaler> Paths<P> {
         Self::new(self.0.iter().map(|p| p.scale(scale)).collect())
     }
 
+    /// Construct a rotated clone of the path with the origin at the path center
+    pub fn rotate(&self, radians: f64) -> Self {
+        Self::new(self.0.iter().map(|p| p.rotate(radians)).collect())
+    }
+
     /// Construct a clone with each point x value flipped
     pub fn flip_x(&self) -> Self {
         Self::new(self.0.iter().map(|p| p.flip_x()).collect())
