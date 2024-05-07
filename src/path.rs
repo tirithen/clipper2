@@ -60,6 +60,24 @@ impl<P: PointScaler> Path<P> {
         )
     }
 
+    /// Construct a scaled clone of the path with the origin at the path center
+    pub fn scale(&self, scale: f64) -> Self {
+        let bounds = self.bounds();
+        let center = bounds.center();
+
+        Self::new(
+            self.0
+                .iter()
+                .map(|p| {
+                    Point::<P>::new(
+                        (center.x() - p.x()) * scale + center.x(),
+                        (center.y() - p.y()) * scale + center.y(),
+                    )
+                })
+                .collect(),
+        )
+    }
+
     /// Construct a clone with each point x value flipped
     pub fn flip_x(&self) -> Self {
         let bounds = self.bounds();
