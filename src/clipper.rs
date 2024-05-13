@@ -213,7 +213,7 @@ impl<P: PointScaler> Clipper<WithClips, P> {
     /// let path: Paths = vec![(0.2, 0.2), (6.0, 0.2), (6.0, 6.0), (0.2, 6.0)].into();
     /// let path2: Paths = vec![(1.2, 1.2), (4.0, 1.2), (1.2, 4.0)].into();
     ///
-    /// let clipper = Clipper::new().add_subject(path).add_clip(path2).union(FillRule::NonZero);
+    /// let result = Clipper::new().add_subject(path).add_clip(path2).union(FillRule::NonZero);
     /// ```
     ///
     /// For more details see the original [union](https://www.angusj.com/clipper2/Docs/Units/Clipper/Functions/Union.htm) docs.
@@ -231,7 +231,7 @@ impl<P: PointScaler> Clipper<WithClips, P> {
     /// let path: Paths = vec![(0.2, 0.2), (6.0, 0.2), (6.0, 6.0), (0.2, 6.0)].into();
     /// let path2: Paths = vec![(1.2, 1.2), (4.0, 1.2), (1.2, 4.0)].into();
     ///
-    /// let clipper = Clipper::new().add_subject(path).add_clip(path2).difference(FillRule::NonZero);
+    /// let result = Clipper::new().add_subject(path).add_clip(path2).difference(FillRule::NonZero);
     /// ```
     ///
     /// For more details see the original [difference](https://www.angusj.com/clipper2/Docs/Units/Clipper/Functions/Difference.htm) docs.
@@ -249,7 +249,7 @@ impl<P: PointScaler> Clipper<WithClips, P> {
     /// let path: Paths = vec![(0.2, 0.2), (6.0, 0.2), (6.0, 6.0), (0.2, 6.0)].into();
     /// let path2: Paths = vec![(1.2, 1.2), (4.0, 1.2), (1.2, 4.0)].into();
     ///
-    /// let clipper = Clipper::new().add_subject(path).add_clip(path2).intersect(FillRule::NonZero);
+    /// let result = Clipper::new().add_subject(path).add_clip(path2).intersect(FillRule::NonZero);
     /// ```
     ///
     /// For more details see the original [intersect](https://www.angusj.com/clipper2/Docs/Units/Clipper/Functions/Intersect.htm) docs.
@@ -267,7 +267,7 @@ impl<P: PointScaler> Clipper<WithClips, P> {
     /// let path: Paths = vec![(0.2, 0.2), (6.0, 0.2), (6.0, 6.0), (0.2, 6.0)].into();
     /// let path2: Paths = vec![(1.2, 1.2), (4.0, 1.2), (1.2, 4.0)].into();
     ///
-    /// let clipper = Clipper::new().add_subject(path).add_clip(path2).xor(FillRule::NonZero);
+    /// let result = Clipper::new().add_subject(path).add_clip(path2).xor(FillRule::NonZero);
     /// ```
     ///
     /// For more details see the original [xor](https://www.angusj.com/clipper2/Docs/Units/Clipper/Functions/XOR.htm) docs.

@@ -161,13 +161,22 @@ impl<P: PointScaler> Path<P> {
 
     /// Construct a new path offset from this one by a delta distance.
     ///
+    /// For closed paths passing a positive delta number will inflate the path
+    /// where passing a negative number will shrink the path.
+    ///
+    /// **NOTE:** Inflate calls will frequently generate a large amount of very
+    /// close extra points and it is therefore recommented to almost always call
+    /// [`Path::simplify`] on the path after inflating/deflating it.
+    ///
     /// # Examples
     ///
     /// ```rust
     /// use clipper2::*;
     ///
     /// let path: Path = vec![(0.0, 0.0), (5.0, 0.0), (5.0, 6.0), (0.0, 6.0)].into();
-    /// let inflated = path.inflate(1.0, JoinType::Square, EndType::Polygon, 2.0);
+    /// let inflated = path
+    ///     .inflate(1.0, JoinType::Square, EndType::Polygon, 2.0)
+    ///     .simplify(0.01, false);
     /// ```
     ///
     /// For more details see the original [inflate paths](https://www.angusj.com/clipper2/Docs/Units/Clipper/Functions/InflatePaths.htm) docs.

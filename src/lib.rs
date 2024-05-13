@@ -50,8 +50,9 @@
 //! let output: Vec<Vec<(f64, f64)>> = path_a
 //!     .to_clipper_subject()
 //!     .add_clip(path_b)
-//!     .difference(FillRule::default())?.
-//!     into();
+//!     .difference(FillRule::default())
+//!     .expect("Failed difference operation")
+//!     .into();
 //!
 //! dbg!(output);
 //! ```

@@ -10,9 +10,17 @@ async fn main() {
 
     // Functional API
     let _result = inflate(path.clone(), 1.0, JoinType::Round, EndType::Polygon, 0.0);
+    let _result = simplify(_result, 0.01, false);
 
     // Alternative paths API
-    let result = path.inflate(1.0, JoinType::Round, EndType::Polygon, 0.0);
+    let result = path
+        .inflate(1.0, JoinType::Round, EndType::Polygon, 0.0)
+        .simplify(0.01, false);
+
+    // NOTE: It is recommented to run simplify after each inflate call as extra
+    //       closely positioned points are likely to be added on each inflate
+    //       call that needs cleanup to reduce the amount of points and
+    //       distortion.
 
     loop {
         clear_background(BLACK);

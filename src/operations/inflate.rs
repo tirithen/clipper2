@@ -2,8 +2,14 @@ use clipper2c_sys::{clipper_delete_paths64, clipper_paths64_inflate, clipper_pat
 
 use crate::{malloc, EndType, JoinType, Paths, PointScaler};
 
-/// These functions encapsulate ClipperOffset, the class that performs both
-/// polygon and open path offsetting.
+/// This function performs both closed path and open path offsetting.
+///
+/// For closed paths passing a positive delta number will inflate the path
+/// where passing a negative number will shrink the path.
+///
+/// **NOTE:** Inflate calls will frequently generate a large amount of very
+/// close extra points and it is therefore recommented to almost always call
+/// [`simplify`](./fn.simplify.html) on the path after inflating/shrinking it.
 ///
 /// # Example
 ///
@@ -13,6 +19,7 @@ use crate::{malloc, EndType, JoinType, Paths, PointScaler};
 /// let paths: Paths = vec![(2.0, 2.0), (6.0, 2.0), (6.0, 10.0), (2.0, 6.0)].into();
 ///
 /// let output = inflate(paths, 1.0, JoinType::Round, EndType::Polygon, 0.0);
+/// let output = simplify(output, 0.01, false);
 ///
 /// dbg!(output);
 /// ```

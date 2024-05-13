@@ -1,6 +1,7 @@
 use crate::{Clipper, ClipperError, FillRule, Paths, PointScaler};
 
-/// This function 'unions' closed subject paths, with and without clip paths.
+/// This function joins a set of closed subject paths, with and without clip
+/// paths.
 ///
 /// # Examples
 ///
