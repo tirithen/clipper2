@@ -5,12 +5,18 @@ use macroquad::prelude::*;
 mod helpers;
 
 #[macroquad::main("Union")]
-async fn main() {
+async fn main() -> Result<(), ClipperError> {
     let path_a: Paths = vec![(0.2, 0.2), (6.0, 0.2), (6.0, 6.0), (0.2, 6.0)].into();
     let path_b: Paths = vec![(5.0, 5.0), (8.0, 5.0), (8.0, 8.0), (5.0, 8.0)].into();
 
-    let result = union(path_a.clone(), path_b.clone(), FillRule::default())
-        .expect("Failed to run boolean operation");
+    // Functional API
+    let _result = union(path_a.clone(), path_b.clone(), FillRule::default())?;
+
+    // Alternative Clipper builder API
+    let result = path_a
+        .to_clipper_subject()
+        .add_clip(path_b.clone())
+        .union(FillRule::default())?;
 
     loop {
         clear_background(BLACK);

@@ -17,7 +17,7 @@ use crate::{Path, Point, PointInPolygonResult, PointScaler};
 /// dbg!(output);
 /// ```
 ///
-/// For more details see [point-in-polygon](https://www.angusj.com/clipper2/Docs/Units/Clipper/Functions/PointInPolygon.htm).
+/// For more details see the original [point-in-polygon](https://www.angusj.com/clipper2/Docs/Units/Clipper/Functions/PointInPolygon.htm) docs.
 pub fn point_in_polygon<P: PointScaler>(point: Point<P>, path: &Path<P>) -> PointInPolygonResult {
     let point_ptr = point.as_clipperpoint64();
     let path_ptr = unsafe { path.to_clipperpath64() };

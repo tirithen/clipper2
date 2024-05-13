@@ -1,6 +1,13 @@
-use clipper2c_sys::{clipper_path64_of_points, clipper_path64_size, ClipperPath64, ClipperPoint64};
+use clipper2c_sys::{
+    clipper_delete_path64, clipper_path64_get_point, clipper_path64_length,
+    clipper_path64_of_points, clipper_path64_simplify, clipper_path64_size, ClipperPath64,
+    ClipperPoint64,
+};
 
-use crate::{malloc, Bounds, Centi, Point, PointScaler};
+use crate::{
+    inflate, malloc, point_in_polygon, Bounds, Centi, EndType, JoinType, Point,
+    PointInPolygonResult, PointScaler,
+};
 
 /// A collection of points.
 ///
@@ -150,6 +157,88 @@ impl<P: PointScaler> Path<P> {
         }
 
         bounds
+    }
+
+    /// Construct a new path offset from this one by a delta distance.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use clipper2::*;
+    ///
+    /// let path: Path = vec![(0.0, 0.0), (5.0, 0.0), (5.0, 6.0), (0.0, 6.0)].into();
+    /// let inflated = path.inflate(1.0, JoinType::Square, EndType::Polygon, 2.0);
+    /// ```
+    ///
+    /// For more details see the original [inflate paths](https://www.angusj.com/clipper2/Docs/Units/Clipper/Functions/InflatePaths.htm) docs.
+    pub fn inflate(
+        &self,
+        delta: f64,
+        join_type: JoinType,
+        end_type: EndType,
+        miter_limit: f64,
+    ) -> Self {
+        inflate(self.clone(), delta, join_type, end_type, miter_limit)
+            .iter()
+            .next()
+            .unwrap()
+            .clone()
+    }
+
+    /// Construct a new path from this one but with a reduced set of points.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use clipper2::*;
+    ///
+    /// let path: Path = vec![(0.0, 0.0), (5.0, 0.002), (5.0, 0.01), (5.1, 0.0), (5.0, 6.0), (0.0, 6.0)].into();
+    /// let simplified = path.simplify(1.0, true);
+    /// ```
+    ///
+    /// For more details see the original [simplify](https://www.angusj.com/clipper2/Docs/Units/Clipper/Functions/SimplifyPaths.htm) docs.
+    pub fn simplify(&self, epsilon: f64, is_open: bool) -> Self {
+        let epsilon = P::scale(epsilon);
+
+        unsafe {
+            let mem = malloc(clipper_path64_size());
+            let paths_ptr = self.to_clipperpath64();
+            let result_ptr = clipper_path64_simplify(mem, paths_ptr, epsilon, is_open.into());
+            clipper_delete_path64(paths_ptr);
+            let result = Path::from_clipperpath64(result_ptr);
+            clipper_delete_path64(result_ptr);
+            result
+        }
+    }
+
+    /// The function result indicates whether the point is inside, or outside,
+    /// or on one of the edges edges of this path.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use clipper2::*;
+    ///
+    /// let path: Path = vec![(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)].into();
+    ///
+    /// let output = path.is_point_inside(Point::new(0.5, 0.5));
+    ///
+    /// dbg!(output);
+    /// ```
+    ///
+    /// For more details see the original [point-in-polygon](https://www.angusj.com/clipper2/Docs/Units/Clipper/Functions/PointInPolygon.htm) docs.
+    pub fn is_point_inside(&self, point: Point<P>) -> PointInPolygonResult {
+        point_in_polygon(point, self)
+    }
+
+    pub(crate) fn from_clipperpath64(ptr: *mut ClipperPath64) -> Self {
+        let paths = unsafe {
+            let len: i32 = clipper_path64_length(ptr).try_into().unwrap();
+            (0..len)
+                .map(|i| clipper_path64_get_point(ptr, i).into())
+                .collect()
+        };
+        Self::new(paths)
     }
 
     pub(crate) unsafe fn to_clipperpath64(&self) -> *mut ClipperPath64 {

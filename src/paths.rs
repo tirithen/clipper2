@@ -4,7 +4,10 @@ use clipper2c_sys::{
     ClipperPaths64,
 };
 
-use crate::{malloc, Bounds, Centi, Path, Point, PointScaler};
+use crate::{
+    inflate, malloc, simplify, Bounds, Centi, Clipper, EndType, JoinType, Path, Point, PointScaler,
+    WithSubjects,
+};
 
 /// A collection of paths.
 ///
@@ -35,7 +38,7 @@ impl<P: PointScaler> Paths<P> {
         self.0.is_empty()
     }
 
-    /// Returns `true` if at least one of the paths contains a point
+    /// Returns `true` if at least one of the paths contains a point.
     pub fn contains_points(&self) -> bool {
         for path in &self.0 {
             if !path.is_empty() {
@@ -46,6 +49,18 @@ impl<P: PointScaler> Paths<P> {
         false
     }
 
+    /// Returns a reference to the first path in the set of paths wrapped in an
+    /// option.
+    pub fn first(&self) -> Option<&Path<P>> {
+        self.iter().next()
+    }
+
+    /// Returns a reference to the path at the given index in the set of paths
+    /// wrapped in an option.
+    pub fn get(&self, index: usize) -> Option<&Path<P>> {
+        self.0.get(index)
+    }
+
     /// Returns an iterator over the paths in the paths.
     pub fn iter(&self) -> PathsIterator<P> {
         PathsIterator {
@@ -54,33 +69,34 @@ impl<P: PointScaler> Paths<P> {
         }
     }
 
-    /// Construct a clone with each point offset by a x/y distance
+    /// Construct a clone with each point offset by a x/y distance.
     #[deprecated]
     pub fn offset(&self, x: f64, y: f64) -> Self {
         self.translate(x, y)
     }
 
-    /// Construct a clone with each point offset by a x/y distance
+    /// Construct a clone with each point offset by a x/y distance.
     pub fn translate(&self, x: f64, y: f64) -> Self {
         Self::new(self.0.iter().map(|p| p.translate(x, y)).collect())
     }
 
-    /// Construct a scaled clone of the path with the origin at the path center
+    /// Construct a scaled clone of the path with the origin at the path center.
     pub fn scale(&self, scale: f64) -> Self {
         Self::new(self.0.iter().map(|p| p.scale(scale)).collect())
     }
 
-    /// Construct a rotated clone of the path with the origin at the path center
+    /// Construct a rotated clone of the path with the origin at the path
+    /// center.
     pub fn rotate(&self, radians: f64) -> Self {
         Self::new(self.0.iter().map(|p| p.rotate(radians)).collect())
     }
 
-    /// Construct a clone with each point x value flipped
+    /// Construct a clone with each point x value flipped.
     pub fn flip_x(&self) -> Self {
         Self::new(self.0.iter().map(|p| p.flip_x()).collect())
     }
 
-    /// Construct a clone with each point y value flipped
+    /// Construct a clone with each point y value flipped.
     pub fn flip_y(&self) -> Self {
         Self::new(self.0.iter().map(|p| p.flip_y()).collect())
     }
@@ -114,6 +130,79 @@ impl<P: PointScaler> Paths<P> {
         }
 
         bounds
+    }
+
+    /// Construct a new set of paths offset from this one by a delta distance.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use clipper2::*;
+    ///
+    /// let paths: Paths = vec![vec![(0.0, 0.0), (5.0, 0.0), (5.0, 6.0), (0.0, 6.0)]].into();
+    /// let inflated = paths.inflate(1.0, JoinType::Square, EndType::Polygon, 2.0);
+    /// ```
+    ///
+    /// For more details see the original [inflate paths](https://www.angusj.com/clipper2/Docs/Units/Clipper/Functions/InflatePaths.htm) docs.
+    pub fn inflate(
+        &self,
+        delta: f64,
+        join_type: JoinType,
+        end_type: EndType,
+        miter_limit: f64,
+    ) -> Self {
+        inflate(self.clone(), delta, join_type, end_type, miter_limit)
+    }
+
+    /// Construct a new set of paths from these ones but with a reduced set of
+    /// points.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use clipper2::*;
+    ///
+    /// let paths: Paths = vec![vec![(0.0, 0.0), (5.0, 0.002), (5.0, 0.01), (5.1, 0.0), (5.0, 6.0), (0.0, 6.0)]].into();
+    /// let simplified = paths.simplify(1.0, true);
+    /// ```
+    ///
+    /// For more details see the original [simplify](https://www.angusj.com/clipper2/Docs/Units/Clipper/Functions/SimplifyPaths.htm) docs.
+    pub fn simplify(&self, epsilon: f64, is_open: bool) -> Self {
+        simplify(self.clone(), epsilon, is_open)
+    }
+
+    /// Create a [`Clipper`] builder with this set of paths as the subject that
+    /// will allow for making boolean operations on this set of paths.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use clipper2::*;
+    ///
+    /// let path: Paths = vec![vec![(0.0, 0.0), (5.0, 6.0), (0.0, 6.0)]].into();
+    /// let path2: Paths = vec![vec![(1.0, 1.0), (4.0, 1.0), (1.0, 4.0)]].into();
+    /// let result = path.to_clipper_subject().add_clip(path2).union(FillRule::default());
+    /// ```
+    pub fn to_clipper_subject(&self) -> Clipper<WithSubjects, P> {
+        let clipper = Clipper::new();
+        clipper.add_subject(self.clone())
+    }
+
+    /// Create a [`Clipper`] builder with this set of paths as the open subject
+    /// that will allow for making boolean operations on this set of paths.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use clipper2::*;
+    ///
+    /// let path: Paths =  vec![vec![(0.0, 0.0), (5.0, 6.0), (0.0, 6.0)]].into();
+    /// let path2: Paths = vec![vec![(1.0, 1.0), (4.0, 1.0), (1.0, 4.0)]].into();
+    /// let result = path.to_clipper_open_subject().add_clip(path2).difference(FillRule::default());
+    /// ```
+    pub fn to_clipper_open_subject(&self) -> Clipper<WithSubjects, P> {
+        let clipper = Clipper::new();
+        clipper.add_open_subject(self.clone())
     }
 
     pub(crate) fn from_clipperpaths64(ptr: *mut ClipperPaths64) -> Self {
@@ -166,6 +255,12 @@ impl<'a, P: PointScaler> Iterator for PathsIterator<'a, P> {
         } else {
             None
         }
+    }
+}
+
+impl<P: PointScaler> From<Path<P>> for Paths<P> {
+    fn from(path: Path<P>) -> Self {
+        vec![path].into()
     }
 }
 

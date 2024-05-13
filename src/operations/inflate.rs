@@ -10,25 +10,26 @@ use crate::{malloc, EndType, JoinType, Paths, PointScaler};
 /// ```rust
 /// use clipper2::*;
 ///
-/// let path: Paths = vec![(2.0, 2.0), (6.0, 2.0), (6.0, 10.0), (2.0, 6.0)].into();
+/// let paths: Paths = vec![(2.0, 2.0), (6.0, 2.0), (6.0, 10.0), (2.0, 6.0)].into();
 ///
-/// let output = inflate(path, 1.0, JoinType::Round, EndType::Polygon, 0.0);
+/// let output = inflate(paths, 1.0, JoinType::Round, EndType::Polygon, 0.0);
 ///
 /// dbg!(output);
 /// ```
 ///
 /// ![Image displaying the result of the inflate example](https://raw.githubusercontent.com/tirithen/clipper2/main/doc-assets/inflate.png)
 ///
-/// For more details see [inflate paths](https://www.angusj.com/clipper2/Docs/Units/Clipper/Functions/InflatePaths.htm).
+/// For more details see the original [inflate paths](https://www.angusj.com/clipper2/Docs/Units/Clipper/Functions/InflatePaths.htm) docs.
 pub fn inflate<P: PointScaler>(
-    paths: Paths<P>,
+    paths: impl Into<Paths<P>>,
     delta: f64,
     join_type: JoinType,
     end_type: EndType,
     miter_limit: f64,
-) -> Paths {
+) -> Paths<P> {
     let delta = P::scale(delta);
     let miter_limit = P::scale(miter_limit);
+    let paths: Paths<P> = paths.into();
 
     unsafe {
         let mem = malloc(clipper_paths64_size());
@@ -50,11 +51,13 @@ pub fn inflate<P: PointScaler>(
 
 #[cfg(test)]
 mod test {
+    use crate::Centi;
+
     use super::*;
 
     #[test]
     fn test_inflate() {
-        let paths: Paths = vec![(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)].into();
+        let paths = vec![(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)];
         let expected_output = vec![vec![
             (2.0, -0.41),
             (2.0, 1.41),
@@ -67,7 +70,7 @@ mod test {
         ]];
 
         let output: Vec<Vec<(f64, f64)>> =
-            inflate(paths, 1.0, JoinType::Square, EndType::Polygon, 0.0).into();
+            inflate::<Centi>(paths, 1.0, JoinType::Square, EndType::Polygon, 0.0).into();
         assert_eq!(output, expected_output);
     }
 }

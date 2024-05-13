@@ -1,4 +1,4 @@
-use crate::{ClipType, Clipper, ClipperError, FillRule, Paths, PointScaler};
+use crate::{Clipper, ClipperError, FillRule, Paths, PointScaler};
 
 /// This function differences closed subject paths from clip paths.
 ///
@@ -18,16 +18,16 @@ use crate::{ClipType, Clipper, ClipperError, FillRule, Paths, PointScaler};
 ///
 /// ![Image displaying the result of the difference example](https://raw.githubusercontent.com/tirithen/clipper2/main/doc-assets/difference.png)
 ///
-/// For more details see [difference](https://www.angusj.com/clipper2/Docs/Units/Clipper/Functions/Difference.htm).
+/// For more details see the original [difference](https://www.angusj.com/clipper2/Docs/Units/Clipper/Functions/Difference.htm) docs.
 pub fn difference<P: PointScaler>(
-    subject: Paths<P>,
-    clip: Paths<P>,
+    subject: impl Into<Paths<P>>,
+    clip: impl Into<Paths<P>>,
     fill_rule: FillRule,
 ) -> Result<Paths<P>, ClipperError> {
-    let clipper = Clipper::<P>::new();
-    clipper.add_subject(subject);
-    clipper.add_clip(clip);
-    clipper.boolean_operation(ClipType::Difference, fill_rule)
+    Clipper::new()
+        .add_subject(subject)
+        .add_clip(clip)
+        .difference(fill_rule)
 }
 
 #[cfg(test)]
@@ -49,10 +49,9 @@ mod test {
             (1.0, 0.0),
         ]];
 
-        let output: Vec<Vec<(f64, f64)>> =
-            difference::<Centi>(path1.into(), path2.into(), FillRule::default())
-                .unwrap()
-                .into();
+        let output: Vec<Vec<(f64, f64)>> = difference::<Centi>(path1, path2, FillRule::default())
+            .unwrap()
+            .into();
         assert_eq!(output, expected_output);
     }
 }

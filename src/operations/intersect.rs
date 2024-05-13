@@ -1,4 +1,4 @@
-use crate::{ClipType, Clipper, ClipperError, FillRule, Paths, PointScaler};
+use crate::{Clipper, ClipperError, FillRule, Paths, PointScaler};
 
 /// This function intersects closed subject paths with clip paths.
 ///
@@ -17,16 +17,16 @@ use crate::{ClipType, Clipper, ClipperError, FillRule, Paths, PointScaler};
 /// ```
 /// ![Image displaying the result of the intersect example](https://raw.githubusercontent.com/tirithen/clipper2/main/doc-assets/intersect.png)
 ///
-/// For more details see [intersect](https://www.angusj.com/clipper2/Docs/Units/Clipper/Functions/Intersect.htm).
+/// For more details see the original [intersect](https://www.angusj.com/clipper2/Docs/Units/Clipper/Functions/Intersect.htm) docs.
 pub fn intersect<P: PointScaler>(
-    subject: Paths<P>,
-    clip: Paths<P>,
+    subject: impl Into<Paths<P>>,
+    clip: impl Into<Paths<P>>,
     fill_rule: FillRule,
 ) -> Result<Paths<P>, ClipperError> {
-    let clipper = Clipper::<P>::new();
-    clipper.add_subject(subject);
-    clipper.add_clip(clip);
-    clipper.boolean_operation(ClipType::Intersection, fill_rule)
+    Clipper::new()
+        .add_subject(subject)
+        .add_clip(clip)
+        .intersect(fill_rule)
 }
 
 #[cfg(test)]
@@ -41,10 +41,9 @@ mod test {
         let path2 = vec![(0.5, 0.5), (1.5, 0.5), (1.5, 1.5), (0.5, 1.5)];
         let expected_output = vec![vec![(1.0, 1.0), (0.5, 1.0), (0.5, 0.5), (1.0, 0.5)]];
 
-        let output: Vec<Vec<(f64, f64)>> =
-            intersect::<Centi>(path1.into(), path2.into(), FillRule::default())
-                .unwrap()
-                .into();
+        let output: Vec<Vec<(f64, f64)>> = intersect::<Centi>(path1, path2, FillRule::default())
+            .unwrap()
+            .into();
         assert_eq!(output, expected_output);
     }
 }

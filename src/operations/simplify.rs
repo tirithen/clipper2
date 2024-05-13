@@ -20,20 +20,24 @@ use crate::{malloc, Paths, PointScaler};
 /// ```rust
 /// use clipper2::*;
 ///
-/// let path: Paths = vec![(1.0, 2.0), (1.0, 2.5), (1.2, 4.0), (1.8, 6.0)].into();
+/// let path: Path = vec![(1.0, 2.0), (1.0, 2.5), (1.2, 4.0), (1.8, 6.0)].into();
 /// let path_simplified = simplify(path.offset(3.0, 0.0), 0.5, false);
 ///
 /// dbg!(path, path_simplified);
 /// ```
 /// ![Image displaying the result of the simplify example](https://raw.githubusercontent.com/tirithen/clipper2/main/doc-assets/simplify.png)
 ///
-/// For more details see [simplify](https://www.angusj.com/clipper2/Docs/Units/Clipper/Functions/SimplifyPaths.htm).
-pub fn simplify<P: PointScaler>(paths: Paths<P>, epsilon: f64, is_open: bool) -> Paths<P> {
+/// For more details see the original [simplify](https://www.angusj.com/clipper2/Docs/Units/Clipper/Functions/SimplifyPaths.htm) docs.
+pub fn simplify<P: PointScaler>(
+    paths: impl Into<Paths<P>>,
+    epsilon: f64,
+    is_open: bool,
+) -> Paths<P> {
     let epsilon = P::scale(epsilon);
 
     unsafe {
         let mem = malloc(clipper_paths64_size());
-        let paths_ptr = paths.to_clipperpaths64();
+        let paths_ptr = paths.into().to_clipperpaths64();
         let result_ptr = clipper_paths64_simplify(mem, paths_ptr, epsilon, is_open.into());
         clipper_delete_paths64(paths_ptr);
         let result = Paths::from_clipperpaths64(result_ptr);
@@ -53,7 +57,7 @@ mod test {
         let path = vec![(0.0, 1.0), (0.1, 0.3), (1.0, 0.0), (1.3, 0.0), (2.0, 0.0)];
         let expected_output = vec![vec![(0.0, 1.0), (0.1, 0.3), (2.0, 0.0)]];
 
-        let output: Vec<Vec<(f64, f64)>> = simplify::<Centi>(path.into(), 0.2, true).into();
+        let output: Vec<Vec<(f64, f64)>> = simplify::<Centi>(path, 0.2, true).into();
         assert_eq!(output, expected_output);
     }
 }

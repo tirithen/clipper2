@@ -8,7 +8,11 @@ mod helpers;
 async fn main() {
     let path: Paths = vec![(2.0, 2.0), (6.0, 2.0), (6.0, 10.0), (2.0, 6.0)].into();
 
-    let result = inflate(path.clone(), 1.0, JoinType::Round, EndType::Polygon, 0.0);
+    // Functional API
+    let _result = inflate(path.clone(), 1.0, JoinType::Round, EndType::Polygon, 0.0);
+
+    // Alternative paths API
+    let result = path.inflate(1.0, JoinType::Round, EndType::Polygon, 0.0);
 
     loop {
         clear_background(BLACK);

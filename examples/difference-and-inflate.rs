@@ -5,18 +5,31 @@ use macroquad::prelude::*;
 mod helpers;
 
 #[macroquad::main("Difference and inflate")]
-async fn main() {
+async fn main() -> Result<(), ClipperError> {
     let circle = circle_path((5.0, 5.0), 3.0, 32);
-    let rectangle: Paths = vec![(0.0, 0.0), (5.0, 0.0), (5.0, 6.0), (0.0, 6.0)].into();
-    let circle2 = circle_path((7.0, 7.0), 1.0, 32);
+    let circle2 = circle_path((6.0, 6.0), 2.0, 32);
+    let circle3 = circle_path((7.0, 7.0), 1.0, 32);
+    let rectangle = vec![(0.0, 0.0), (5.0, 0.0), (5.0, 6.0), (0.0, 6.0)];
 
-    let result = difference(circle, rectangle, FillRule::default())
-        .expect("Failed to run boolean operation");
+    // Functional API
+    let _result = difference(circle.clone(), circle2.clone(), FillRule::default())?;
+    let _result = difference(_result, circle3.clone(), FillRule::default())?;
+    let _result = difference(_result, rectangle.clone(), FillRule::default())?;
 
-    let result = difference(result.clone(), circle2, FillRule::default())
-        .expect("Failed to run boolean operation");
+    let _result2 = inflate(_result, 1.0, JoinType::Round, EndType::Polygon, 0.0);
+    let _result2 = simplify(_result2, 0.01, false);
 
-    let result2 = inflate(result.clone(), 1.0, JoinType::Round, EndType::Polygon, 0.0);
+    // Alternative Clipper builder API
+    let result = circle
+        .to_clipper_subject()
+        .add_clip(circle2)
+        .add_clip(circle3)
+        .add_clip(rectangle)
+        .difference(FillRule::default())?;
+
+    let result2 = result
+        .inflate(1.0, JoinType::Round, EndType::Polygon, 0.0)
+        .simplify(0.01, false);
 
     loop {
         clear_background(BLACK);
