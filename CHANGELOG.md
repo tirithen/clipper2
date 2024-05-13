@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.3](https://github.com/tirithen/clipper2/compare/v0.2.2...v0.2.3) (2024-05-13)
+
+
+### Features
+
+* expose clipper builder, add path methods ([0702f67](https://github.com/tirithen/clipper2/commit/0702f679425e20c8f833cb5ac52e9210432aebb5))
+
 ### [0.2.2](https://github.com/tirithen/clipper2/compare/v0.2.1...v0.2.2) (2024-05-07)
 
 
