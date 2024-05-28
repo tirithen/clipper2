@@ -288,6 +288,15 @@ impl<'a, P: PointScaler> Iterator for PathIterator<'a, P> {
     }
 }
 
+impl<P: PointScaler> IntoIterator for Path<P> {
+    type Item = Point<P>;
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
+    }
+}
+
 impl<P: PointScaler> From<Path<P>> for Vec<Point<P>> {
     fn from(path: Path<P>) -> Self {
         path.0.clone()
