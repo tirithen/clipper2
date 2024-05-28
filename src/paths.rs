@@ -81,8 +81,18 @@ impl<P: PointScaler> Paths<P> {
     }
 
     /// Construct a scaled clone of the path with the origin at the path center.
-    pub fn scale(&self, scale: f64) -> Self {
-        Self::new(self.0.iter().map(|p| p.scale(scale)).collect())
+    pub fn scale(&self, scale_x: f64, scale_y: f64) -> Self {
+        Self::new(self.0.iter().map(|p| p.scale(scale_x, scale_y)).collect())
+    }
+
+    /// Construct a scaled clone of the path with the origin at a given point.
+    pub fn scale_around_point(&self, scale_x: f64, scale_y: f64, point: Point<P>) -> Self {
+        Self::new(
+            self.0
+                .iter()
+                .map(|p| p.scale_around_point(scale_x, scale_y, point))
+                .collect(),
+        )
     }
 
     /// Construct a rotated clone of the path with the origin at the path

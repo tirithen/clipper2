@@ -68,17 +68,21 @@ impl<P: PointScaler> Path<P> {
     }
 
     /// Construct a scaled clone of the path with the origin at the path center
-    pub fn scale(&self, scale: f64) -> Self {
+    pub fn scale(&self, scale_x: f64, scale_y: f64) -> Self {
         let bounds = self.bounds();
         let center = bounds.center();
+        self.scale_around_point(scale_x, scale_y, center)
+    }
 
+    /// Construct a scaled clone of the path with the origin at a given point
+    pub fn scale_around_point(&self, scale_x: f64, scale_y: f64, point: Point<P>) -> Self {
         Self::new(
             self.0
                 .iter()
                 .map(|p| {
                     Point::<P>::new(
-                        (center.x() - p.x()) * scale + center.x(),
-                        (center.y() - p.y()) * scale + center.y(),
+                        (point.x() - p.x()) * scale_x + point.x(),
+                        (point.y() - p.y()) * scale_y + point.y(),
                     )
                 })
                 .collect(),
@@ -132,7 +136,7 @@ impl<P: PointScaler> Path<P> {
     }
 
     /// Returns the bounds for this path
-    pub fn bounds(&self) -> Bounds {
+    pub fn bounds(&self) -> Bounds<P> {
         let mut bounds = Bounds::minmax();
 
         for p in &self.0 {
