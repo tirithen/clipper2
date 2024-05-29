@@ -20,7 +20,11 @@ use crate::{
 /// let path_from_slices: Path = vec![[0.0, 0.0], [5.0, 0.0], [5.0, 6.0], [0.0, 6.0]].into();
 /// ```
 #[derive(Debug, Clone, Default, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(bound = "P: PointScaler")
+)]
 pub struct Path<P: PointScaler = Centi>(Vec<Point<P>>);
 
 impl<P: PointScaler> Path<P> {

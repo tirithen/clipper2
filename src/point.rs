@@ -26,7 +26,6 @@ pub trait PointScaler: Clone + Copy {
 
 /// No scaling.
 #[derive(Debug, Copy, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct One;
 
 impl PointScaler for One {
@@ -35,7 +34,6 @@ impl PointScaler for One {
 
 /// Scale by 10.
 #[derive(Debug, Copy, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Deci;
 
 impl PointScaler for Deci {
@@ -44,7 +42,6 @@ impl PointScaler for Deci {
 
 /// Scale by 100. This is the default.
 #[derive(Debug, Copy, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Centi;
 
 impl PointScaler for Centi {
@@ -53,7 +50,6 @@ impl PointScaler for Centi {
 
 /// Scale by 1000.
 #[derive(Debug, Copy, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Milli;
 
 impl PointScaler for Milli {
@@ -92,7 +88,8 @@ impl PointScaler for Milli {
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
-    serde(transparent)
+    serde(transparent),
+    serde(bound = "P: PointScaler")
 )]
 pub struct Point<P: PointScaler = Centi>(
     ClipperPoint64,
