@@ -68,6 +68,15 @@ impl<P: PointScaler> Path<P> {
     }
 
     /// Construct a scaled clone of the path with the origin at the path center
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use clipper2::Path;
+    /// let path: Path = vec![(-1.0, -1.0), (1.0, 1.0)].into();
+    /// let scaled = path.scale(2.0, 2.0);
+    /// assert_eq!(scaled.iter().map(|p| (p.x(), p.y())).collect::<Vec<_>>(), vec![(-2.0, -2.0), (2.0, 2.0)]);
+    /// ```
     pub fn scale(&self, scale_x: f64, scale_y: f64) -> Self {
         let bounds = self.bounds();
         let center = bounds.center();
@@ -75,14 +84,23 @@ impl<P: PointScaler> Path<P> {
     }
 
     /// Construct a scaled clone of the path with the origin at a given point
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use clipper2::Path;
+    /// let path: Path = vec![(0.0, 0.0), (1.0, 1.0)].into();
+    /// let scaled = path.scale_around_point(2.0, 2.0, (0.0, 0.0).into());
+    /// assert_eq!(scaled.iter().map(|p| (p.x(), p.y())).collect::<Vec<_>>(), vec![(0.0, 0.0), (2.0, 2.0)]);
+    /// ```
     pub fn scale_around_point(&self, scale_x: f64, scale_y: f64, point: Point<P>) -> Self {
         Self::new(
             self.0
                 .iter()
                 .map(|p| {
                     Point::<P>::new(
-                        (point.x() - p.x()) * scale_x + point.x(),
-                        (point.y() - p.y()) * scale_y + point.y(),
+                        (p.x() - point.x()) * scale_x + point.x(),
+                        (p.y() - point.y()) * scale_y + point.y(),
                     )
                 })
                 .collect(),
