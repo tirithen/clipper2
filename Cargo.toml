@@ -18,7 +18,7 @@ serde = ["dep:serde", "clipper2c-sys/serde", "clipper2c-sys/generate-bindings"]
 
 [dependencies]
 libc = "0.2"
-clipper2c-sys = "0.1.0"
+clipper2c-sys = "0.1.1"
 thiserror = "1.0.59"
 serde = { version = "1", features = ["derive"], optional = true }
 
