@@ -388,4 +388,12 @@ mod test {
         assert_eq!(point2.x_scaled(), 1000);
         assert_eq!(point2.y_scaled(), 2000);
     }
+
+    #[test]
+    fn test_into_iterator() {
+        let paths = Paths::<Centi>::from(vec![vec![(0.0, 0.0), (1.0, 1.0)]; 2]);
+        for path in paths {
+            assert_eq!(path.len(), 2);
+        }
+    }
 }
