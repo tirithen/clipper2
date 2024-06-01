@@ -423,4 +423,34 @@ mod test {
             assert_eq!(path.len(), 2);
         }
     }
+
+    #[test]
+    fn test_signed_area() {
+        let paths = Paths::new(vec![
+            Path::<Centi>::rectangle(10.0, 20.0, 30.0, 150.0),
+            Path::<Centi>::rectangle(40.0, 20.0, 10.0, 15.0),
+        ]);
+        let area = paths.signed_area();
+        assert_eq!(area, 4650.0);
+    }
+
+    #[test]
+    fn test_signed_area_negative() {
+        let paths = Paths::new(vec![
+            Path::<Centi>::rectangle(-20.0, 25.0, -45.0, 30.0),
+            Path::<Centi>::rectangle(-20.0, 55.0, 15.0, 15.0),
+        ]);
+        let area = paths.signed_area();
+        assert_eq!(area, -1125.0);
+    }
+
+    #[test]
+    fn test_signed_area_counts_overlapping_areas_comulatively_for_each_path() {
+        let paths = Paths::new(vec![
+            Path::<Centi>::rectangle(10.0, 20.0, 30.0, 150.0),
+            Path::<Centi>::rectangle(10.0, 20.0, 100.0, 15.0),
+        ]);
+        let area = paths.signed_area();
+        assert_eq!(area, 6000.0);
+    }
 }

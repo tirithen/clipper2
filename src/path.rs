@@ -407,4 +407,18 @@ mod test {
             assert_eq!(point.x(), point.y());
         }
     }
+
+    #[test]
+    fn test_signed_area() {
+        let path = Path::<Centi>::rectangle(10.0, 20.0, 30.0, 15.0);
+        let area = path.signed_area();
+        assert_eq!(area, 450.0);
+    }
+
+    #[test]
+    fn test_signed_area_negative() {
+        let path = Path::<Centi>::rectangle(-20.0, 25.0, -40.0, 30.0);
+        let area = path.signed_area();
+        assert_eq!(area, -1200.0);
+    }
 }
