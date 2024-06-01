@@ -1,5 +1,5 @@
 use clipper2c_sys::{
-    clipper_delete_path64, clipper_paths64_get_point, clipper_paths64_length,
+    clipper_delete_path64, clipper_paths64_area, clipper_paths64_get_point, clipper_paths64_length,
     clipper_paths64_of_paths, clipper_paths64_path_length, clipper_paths64_size, ClipperPath64,
     ClipperPaths64,
 };
@@ -212,6 +212,33 @@ impl<P: PointScaler> Paths<P> {
     pub fn to_clipper_open_subject(&self) -> Clipper<WithSubjects, P> {
         let clipper = Clipper::new();
         clipper.add_open_subject(self.clone())
+    }
+
+    /// This function returns the area of the supplied paths. It's assumed
+    /// that the paths are closed and do not self-intersect.
+    ///
+    /// Depending on the paths' winding orientations, this value may be positive
+    /// or negative. Assuming paths are displayed in a Cartesian plane (with X
+    /// values increasing heading right and Y values increasing heading up) then
+    /// clockwise winding will have negative areas and counter-clockwise winding
+    /// have positive areas.
+    ///
+    /// Conversely, when paths are displayed where Y values increase heading
+    /// down, then clockwise paths will have positive areas, and
+    /// counter-clockwise paths will have negative areas.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use clipper2::*;
+    ///
+    /// let paths: Paths = vec![vec![(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]].into();
+    ///
+    /// assert_eq!(paths.signed_area(), 1.0);
+    /// ```
+    ///
+    pub fn signed_area(&self) -> f64 {
+        unsafe { clipper_paths64_area(self.to_clipperpaths64()) / (P::MULTIPLIER * P::MULTIPLIER) }
     }
 
     pub(crate) fn from_clipperpaths64(ptr: *mut ClipperPaths64) -> Self {

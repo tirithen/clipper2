@@ -1,5 +1,5 @@
 use clipper2c_sys::{
-    clipper_delete_path64, clipper_path64_get_point, clipper_path64_length,
+    clipper_delete_path64, clipper_path64_area, clipper_path64_get_point, clipper_path64_length,
     clipper_path64_of_points, clipper_path64_simplify, clipper_path64_size, ClipperPath64,
     ClipperPoint64,
 };
@@ -249,6 +249,33 @@ impl<P: PointScaler> Path<P> {
     /// For more details see the original [point-in-polygon](https://www.angusj.com/clipper2/Docs/Units/Clipper/Functions/PointInPolygon.htm) docs.
     pub fn is_point_inside(&self, point: Point<P>) -> PointInPolygonResult {
         point_in_polygon(point, self)
+    }
+
+    /// This function returns the area of the supplied polygon. It's assumed
+    /// that the path is closed and does not self-intersect.
+    ///
+    /// Depending on the path's winding orientation, this value may be positive
+    /// or negative. Assuming paths are displayed in a Cartesian plane (with X
+    /// values increasing heading right and Y values increasing heading up) then
+    /// clockwise winding will have negative areas and counter-clockwise winding
+    /// have positive areas.
+    ///
+    /// Conversely, when paths are displayed where Y values increase heading
+    /// down, then clockwise paths will have positive areas, and
+    /// counter-clockwise paths will have negative areas.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use clipper2::*;
+    ///
+    /// let path: Path = vec![(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)].into();
+    ///
+    /// assert_eq!(path.signed_area(), 1.0);
+    /// ```
+    ///
+    pub fn signed_area(&self) -> f64 {
+        unsafe { clipper_path64_area(self.to_clipperpath64()) / (P::MULTIPLIER * P::MULTIPLIER) }
     }
 
     pub(crate) fn from_clipperpath64(ptr: *mut ClipperPath64) -> Self {
