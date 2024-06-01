@@ -14,15 +14,18 @@ categories = ["algorithms"]
 [features]
 default = ["doc-images"]
 doc-images = []
+serde = ["dep:serde", "clipper2c-sys/serde", "clipper2c-sys/generate-bindings"]
 
 [dependencies]
 libc = "0.2"
 clipper2c-sys = "0.1.1"
 thiserror = "1.0.59"
+serde = { version = "1", features = ["derive"], optional = true }
 
 [dev-dependencies]
 macroquad = "0.4.5"
 embed-doc-image = "0.1"
+serde_json = "1"
 
 [package.metadata.docs.rs]
 # docs.rs uses a nightly compiler, so by instructing it to use our `doc-images` feature we

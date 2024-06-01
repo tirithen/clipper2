@@ -19,7 +19,12 @@ use crate::{
 /// let path_from_tuples: Path = vec![(0.0, 0.0), (5.0, 0.0), (5.0, 6.0), (0.0, 6.0)].into();
 /// let path_from_slices: Path = vec![[0.0, 0.0], [5.0, 0.0], [5.0, 6.0], [0.0, 6.0]].into();
 /// ```
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(bound = "P: PointScaler")
+)]
 pub struct Path<P: PointScaler = Centi>(Vec<Point<P>>);
 
 impl<P: PointScaler> Path<P> {
@@ -420,5 +425,16 @@ mod test {
         let path = Path::<Centi>::rectangle(-20.0, 25.0, -40.0, 30.0);
         let area = path.signed_area();
         assert_eq!(area, -1200.0);
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn test_serde() {
+        let path = Path::<Centi>::from(vec![(0.0, 0.0), (1.0, 1.0)]);
+        let serialized = serde_json::to_string(&path).unwrap();
+        assert_eq!(serialized, r#"[{"x":0,"y":0},{"x":100,"y":100}]"#);
+
+        let deserialized: Path<Centi> = serde_json::from_str(&serialized).unwrap();
+        assert_eq!(deserialized, path);
     }
 }
