@@ -43,6 +43,17 @@ impl<P: PointScaler> Path<P> {
         self.is_empty()
     }
 
+    /// Creates a path in a rectangle shape
+    pub fn rectangle(x: f64, y: f64, size_x: f64, size_y: f64) -> Self {
+        vec![
+            (x, y),
+            (x + size_x, y),
+            (x + size_x, y + size_y),
+            (x, y + size_y),
+        ]
+        .into()
+    }
+
     /// Returns an iterator over the points in the path.
     pub fn iter(&self) -> PathIterator<P> {
         PathIterator {
