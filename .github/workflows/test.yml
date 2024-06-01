@@ -4,13 +4,29 @@ on:
   pull_request:
 
 jobs:
-  test:
-    name: cargo test
+  test_all_features:
+    name: cargo test (all features)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rust-lang/setup-rust-toolchain@v1
       - run: cargo test --all-features
+
+  test_no_features:
+    name: cargo test (no features)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - run: cargo test
+
+  test_serde_feature:
+    name: cargo test (serde)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - run: cargo test --features serde
 
   # Check formatting with rustfmt
   formatting:

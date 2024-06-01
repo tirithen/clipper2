@@ -25,7 +25,7 @@ pub trait PointScaler: Clone + Copy {
 }
 
 /// No scaling.
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct One;
 
 impl PointScaler for One {
@@ -33,7 +33,7 @@ impl PointScaler for One {
 }
 
 /// Scale by 10.
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Deci;
 
 impl PointScaler for Deci {
@@ -41,7 +41,7 @@ impl PointScaler for Deci {
 }
 
 /// Scale by 100. This is the default.
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Centi;
 
 impl PointScaler for Centi {
@@ -49,7 +49,7 @@ impl PointScaler for Centi {
 }
 
 /// Scale by 1000.
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Milli;
 
 impl PointScaler for Milli {
@@ -85,7 +85,16 @@ impl PointScaler for Milli {
 /// assert_eq!(point.y_scaled(), 2000);
 /// ```
 #[derive(Debug, Copy, Clone)]
-pub struct Point<P: PointScaler = Centi>(ClipperPoint64, PhantomData<P>);
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(transparent),
+    serde(bound = "P: PointScaler")
+)]
+pub struct Point<P: PointScaler = Centi>(
+    ClipperPoint64,
+    #[cfg_attr(feature = "serde", serde(skip))] PhantomData<P>,
+);
 
 impl<P: PointScaler> Point<P> {
     /// The zero point.
@@ -238,5 +247,16 @@ mod test {
         assert_eq!(point.y(), 2.0);
         assert_eq!(point.x_scaled(), 2000);
         assert_eq!(point.y_scaled(), 4000);
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn test_serde() {
+        let point = Point::<Centi>::new(1.0, 2.0);
+        let serialized = serde_json::to_string(&point).unwrap();
+        assert_eq!(serialized, r#"{"x":100,"y":200}"#);
+
+        let deserialized: Point<Centi> = serde_json::from_str(&serialized).unwrap();
+        assert_eq!(point, deserialized);
     }
 }
