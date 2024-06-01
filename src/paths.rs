@@ -87,7 +87,8 @@ impl<P: PointScaler> Paths<P> {
 
     /// Construct a scaled clone of the path with the origin at the path center.
     pub fn scale(&self, scale_x: f64, scale_y: f64) -> Self {
-        Self::new(self.0.iter().map(|p| p.scale(scale_x, scale_y)).collect())
+        let center = self.bounds().center();
+        self.scale_around_point(scale_x, scale_y, center)
     }
 
     /// Construct a scaled clone of the path with the origin at a given point.
@@ -117,7 +118,7 @@ impl<P: PointScaler> Paths<P> {
     }
 
     /// Returns the bounds for this path.
-    pub fn bounds(&self) -> Bounds {
+    pub fn bounds(&self) -> Bounds<P> {
         let mut bounds = Bounds::minmax();
 
         for p in &self.0 {
@@ -467,6 +468,56 @@ mod test {
         ]);
         let area = paths.signed_area();
         assert_eq!(area, 6000.0);
+    }
+
+    #[test]
+    fn test_scale_two_separate_triangles() {
+        let paths = Paths::<Centi>::from(vec![
+            vec![(0.0, 0.0), (1.0, 0.0), (0.0, 1.0)],
+            vec![(10.0, 10.0), (11.0, 10.0), (10.0, 11.0)],
+        ]);
+
+        let scaled = paths.scale(4.0, 2.0);
+
+        let expected_output = Paths::<Centi>::from(vec![
+            vec![(-16.5, -5.5), (-12.5, -5.5), (-16.5, -3.5)],
+            vec![(23.5, 14.5), (27.5, 14.5), (23.5, 16.5)],
+        ]);
+
+        assert_eq!(scaled, expected_output);
+    }
+
+    #[test]
+    fn test_scale_overlapping_rectangles() {
+        let paths = Paths::<Centi>::from(vec![
+            Path::rectangle(-10.0, -20.0, 20.0, 40.0),
+            Path::rectangle(-20.0, -10.0, 40.0, 20.0),
+        ]);
+        let scaled = paths.scale(4.0, 2.0);
+
+        let expected_output = Paths::<Centi>::from(vec![
+            vec![(-40.0, -40.0), (40.0, -40.0), (40.0, 40.0), (-40.0, 40.0)],
+            vec![(-80.0, -20.0), (80.0, -20.0), (80.0, 20.0), (-80.0, 20.0)],
+        ]);
+
+        assert_eq!(scaled, expected_output);
+    }
+
+    #[test]
+    fn test_scale_around_point() {
+        let paths = Paths::<Centi>::from(vec![
+            Path::rectangle(-10.0, -20.0, 20.0, 40.0),
+            Path::rectangle(-20.0, -10.0, 40.0, 20.0),
+        ]);
+
+        let scaled = paths.scale_around_point(4.0, 2.0, Point::new(-10.0, -20.0));
+
+        let expected_output = Paths::<Centi>::from(vec![
+            vec![(-10.0, -20.0), (70.0, -20.0), (70.0, 60.0), (-10.0, 60.0)],
+            vec![(-50.0, 0.0), (110.0, 0.0), (110.0, 40.0), (-50.0, 40.0)],
+        ]);
+
+        assert_eq!(scaled, expected_output);
     }
 
     #[cfg(feature = "serde")]

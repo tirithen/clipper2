@@ -94,8 +94,7 @@ impl<P: PointScaler> Path<P> {
     /// assert_eq!(scaled.iter().map(|p| (p.x(), p.y())).collect::<Vec<_>>(), vec![(-2.0, -2.0), (2.0, 2.0)]);
     /// ```
     pub fn scale(&self, scale_x: f64, scale_y: f64) -> Self {
-        let bounds = self.bounds();
-        let center = bounds.center();
+        let center = self.bounds().center();
         self.scale_around_point(scale_x, scale_y, center)
     }
 
