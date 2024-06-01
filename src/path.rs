@@ -1,5 +1,5 @@
 use clipper2c_sys::{
-    clipper_delete_path64, clipper_path64_get_point, clipper_path64_length,
+    clipper_delete_path64, clipper_path64_area, clipper_path64_get_point, clipper_path64_length,
     clipper_path64_of_points, clipper_path64_simplify, clipper_path64_size, ClipperPath64,
     ClipperPoint64,
 };
@@ -251,6 +251,33 @@ impl<P: PointScaler> Path<P> {
         point_in_polygon(point, self)
     }
 
+    /// This function returns the area of the supplied polygon. It's assumed
+    /// that the path is closed and does not self-intersect.
+    ///
+    /// Depending on the path's winding orientation, this value may be positive
+    /// or negative. Assuming paths are displayed in a Cartesian plane (with X
+    /// values increasing heading right and Y values increasing heading up) then
+    /// clockwise winding will have negative areas and counter-clockwise winding
+    /// have positive areas.
+    ///
+    /// Conversely, when paths are displayed where Y values increase heading
+    /// down, then clockwise paths will have positive areas, and
+    /// counter-clockwise paths will have negative areas.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use clipper2::*;
+    ///
+    /// let path: Path = vec![(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)].into();
+    ///
+    /// assert_eq!(path.signed_area(), 1.0);
+    /// ```
+    ///
+    pub fn signed_area(&self) -> f64 {
+        unsafe { clipper_path64_area(self.to_clipperpath64()) / (P::MULTIPLIER * P::MULTIPLIER) }
+    }
+
     pub(crate) fn from_clipperpath64(ptr: *mut ClipperPath64) -> Self {
         let paths = unsafe {
             let len: i32 = clipper_path64_length(ptr).try_into().unwrap();
@@ -379,5 +406,19 @@ mod test {
         for point in path {
             assert_eq!(point.x(), point.y());
         }
+    }
+
+    #[test]
+    fn test_signed_area() {
+        let path = Path::<Centi>::rectangle(10.0, 20.0, 30.0, 15.0);
+        let area = path.signed_area();
+        assert_eq!(area, 450.0);
+    }
+
+    #[test]
+    fn test_signed_area_negative() {
+        let path = Path::<Centi>::rectangle(-20.0, 25.0, -40.0, 30.0);
+        let area = path.signed_area();
+        assert_eq!(area, -1200.0);
     }
 }
