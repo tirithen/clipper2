@@ -267,6 +267,15 @@ impl<'a, P: PointScaler> Iterator for PathsIterator<'a, P> {
     }
 }
 
+impl<P: PointScaler> IntoIterator for Paths<P> {
+    type Item = Path<P>;
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
+    }
+}
+
 impl<P: PointScaler> From<Path<P>> for Paths<P> {
     fn from(path: Path<P>) -> Self {
         vec![path].into()
@@ -378,5 +387,13 @@ mod test {
         assert_eq!(point1.y_scaled(), 600);
         assert_eq!(point2.x_scaled(), 1000);
         assert_eq!(point2.y_scaled(), 2000);
+    }
+
+    #[test]
+    fn test_into_iterator() {
+        let paths = Paths::<Centi>::from(vec![vec![(0.0, 0.0), (1.0, 1.0)]; 2]);
+        for path in paths {
+            assert_eq!(path.len(), 2);
+        }
     }
 }
