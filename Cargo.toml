@@ -14,11 +14,11 @@ categories = ["algorithms"]
 [features]
 default = ["doc-images"]
 doc-images = []
-serde = ["dep:serde", "clipper2c-sys/serde", "clipper2c-sys/generate-bindings"]
+serde = ["dep:serde", "clipper2c-sys/serde"]
 
 [dependencies]
 libc = "0.2"
-clipper2c-sys = "0.1.1"
+clipper2c-sys = "0.1.2"
 thiserror = "1.0.59"
 serde = { version = "1", features = ["derive"], optional = true }
 
