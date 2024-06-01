@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.3.0](https://github.com/tirithen/clipper2/compare/v0.2.3...v0.3.0) (2024-06-01)
+
+
+### ⚠ BREAKING CHANGES
+
+* scale now takes two arguments, allowing separate x and
+y scaling factors
+
+### Features
+
+* implement IntoIterator for Path/Paths ([846602c](https://github.com/tirithen/clipper2/commit/846602c96a8a103d7097fc97d445f2e9f01c3c85))
+* **Path:** add .rectangle method ([a1dbb5c](https://github.com/tirithen/clipper2/commit/a1dbb5cbaf16e5415585cba11f60bb4efe28b144))
+* **serde:** ser./deser. Path and Paths ([b9800b7](https://github.com/tirithen/clipper2/commit/b9800b71deb805c2142153ea96b238f2f0a75c7c))
+* support calculating signed path areas ([b1c6386](https://github.com/tirithen/clipper2/commit/b1c63862ef4effcbbec87861af8564f7b1d8bad1))
+* support scaling around a point ([ba6dec3](https://github.com/tirithen/clipper2/commit/ba6dec3d14c92754c7294e9f0a4d9cab6d261925))
+
 ### [0.2.3](https://github.com/tirithen/clipper2/compare/v0.2.2...v0.2.3) (2024-05-13)
 
 
