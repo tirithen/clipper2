@@ -319,6 +319,12 @@ impl<P: PointScaler> IntoIterator for Paths<P> {
     }
 }
 
+impl<P: PointScaler> FromIterator<Path<P>> for Paths<P> {
+    fn from_iter<T: IntoIterator<Item = Path<P>>>(iter: T) -> Self {
+        Paths(iter.into_iter().collect())
+    }
+}
+
 impl<P: PointScaler> From<Path<P>> for Paths<P> {
     fn from(path: Path<P>) -> Self {
         vec![path].into()
@@ -518,6 +524,18 @@ mod test {
         ]);
 
         assert_eq!(scaled, expected_output);
+    }
+
+    #[test]
+    fn test_from_iterator() {
+        let paths = vec![
+            Path::rectangle(-10.0, -20.0, 20.0, 40.0),
+            Path::rectangle(-20.0, -10.0, 40.0, 20.0),
+        ]
+        .into_iter()
+        .collect::<Paths<Centi>>();
+
+        assert_eq!(paths.len(), 2);
     }
 
     #[cfg(feature = "serde")]
