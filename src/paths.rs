@@ -72,12 +72,6 @@ impl<P: PointScaler> Paths<P> {
     }
 
     /// Construct a clone with each point offset by a x/y distance.
-    #[deprecated]
-    pub fn offset(&self, x: f64, y: f64) -> Self {
-        self.translate(x, y)
-    }
-
-    /// Construct a clone with each point offset by a x/y distance.
     pub fn translate(&self, x: f64, y: f64) -> Self {
         Self::new(self.0.iter().map(|p| p.translate(x, y)).collect())
     }
