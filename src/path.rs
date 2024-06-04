@@ -60,11 +60,8 @@ impl<P: PointScaler> Path<P> {
     }
 
     /// Returns an iterator over the points in the path.
-    pub fn iter(&self) -> PathIterator<P> {
-        PathIterator {
-            items: self,
-            index: 0,
-        }
+    pub fn iter(&self) -> std::slice::Iter<'_, Point<P>> {
+        self.0.iter()
     }
 
     /// Construct a clone with each point offset by a x/y distance
@@ -332,32 +329,18 @@ impl<P: PointScaler> Path<P> {
     }
 }
 
-/// An iterator over the points in a path.
-pub struct PathIterator<'a, P: PointScaler> {
-    items: &'a Path<P>,
-    index: usize,
-}
-
-impl<'a, P: PointScaler> Iterator for PathIterator<'a, P> {
-    type Item = &'a Point<P>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.index < self.items.0.len() {
-            let result = Some(&self.items.0[self.index]);
-            self.index += 1;
-            result
-        } else {
-            None
-        }
-    }
-}
-
 impl<P: PointScaler> IntoIterator for Path<P> {
     type Item = Point<P>;
     type IntoIter = std::vec::IntoIter<Self::Item>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.0.into_iter()
+    }
+}
+
+impl<P: PointScaler> FromIterator<Point<P>> for Path<P> {
+    fn from_iter<T: IntoIterator<Item = Point<P>>>(iter: T) -> Self {
+        Path(iter.into_iter().collect())
     }
 }
 
@@ -429,9 +412,49 @@ mod test {
     #[test]
     fn test_into_iterator() {
         let path = Path::<Centi>::from(vec![(0.0, 0.0), (1.0, 1.0)]);
+
+        let mut count = 0;
+
         for point in path {
             assert_eq!(point.x(), point.y());
+            count += 1;
         }
+
+        assert_eq!(count, 2);
+    }
+
+    #[test]
+    fn test_iter() {
+        let path = Path::<Centi>::from(vec![(0.0, 0.0), (1.0, 1.0)]);
+
+        let mut count = 0;
+
+        for point in path.iter() {
+            assert_eq!(point.x(), point.y());
+            count += 1;
+        }
+
+        assert_eq!(count, 2);
+
+        let x_values: Vec<_> = path.iter().map(|point| point.x()).collect();
+        assert_eq!(x_values, vec![0.0, 1.0]);
+    }
+
+    #[test]
+    fn test_into_iter() {
+        let path = Path::<Centi>::from(vec![(0.0, 0.0), (1.0, 1.0)]);
+
+        let mut count = 0;
+
+        for point in path.clone().into_iter() {
+            assert_eq!(point.x(), point.y());
+            count += 1;
+        }
+
+        assert_eq!(count, 2);
+
+        let x_values: Vec<_> = path.into_iter().map(|point| point.x()).collect();
+        assert_eq!(x_values, vec![0.0, 1.0]);
     }
 
     #[test]
@@ -455,7 +478,7 @@ mod test {
         let serialized = serde_json::to_string(&path).unwrap();
         assert_eq!(serialized, r#"[{"x":0,"y":0},{"x":100,"y":100}]"#);
 
-        let deserialized: Path<Centi> = serde_json::from_str(&serialized).unwrap();
+        let deserialized: Path = serde_json::from_str(&serialized).unwrap();
         assert_eq!(deserialized, path);
     }
 }
