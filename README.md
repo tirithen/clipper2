@@ -28,7 +28,7 @@ mod helpers;
 #[macroquad::main("Difference and inflate")]
 async fn main() -> Result<(), ClipperError> {
     let circle = circle_path((5.0, 5.0), 3.0, 32);
-    let circle2 = circle_path((6.0, 6.0), 2.0, 32);
+    let circle2 = circle_path((7.0, 7.0), 1.0, 32);
     let rectangle = vec![(0.0, 0.0), (5.0, 0.0), (5.0, 6.0), (0.0, 6.0)];
 
     let result = circle
