@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.4.0](https://github.com/tirithen/clipper2/compare/v0.3.0...v0.4.0) (2024-06-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* Use .translate instead of .offset for Paths and Path
+structs.
+* Removes the custom iterators PathIterator and
+PathsIterator, instead rely on the standard iterator types from vec and
+slice.
+
+### Features
+
+* improve the iterator impls for Paths and Path ([0c93f5d](https://github.com/tirithen/clipper2/commit/0c93f5da4c7c5c2a19acb5b0de2fa11217727c82))
+* remove depr. .offset method from Paths/Path ([4ee9fd4](https://github.com/tirithen/clipper2/commit/4ee9fd4d8196c2bdf841353b5675719bcf58a9d6))
+
 ## [0.3.0](https://github.com/tirithen/clipper2/compare/v0.2.3...v0.3.0) (2024-06-01)
 
 
