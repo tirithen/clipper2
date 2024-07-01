@@ -4,39 +4,99 @@ on:
   pull_request:
 
 jobs:
-  test_all_features:
-    name: cargo test (all features)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-      - run: cargo test --all-features
-
-  test_no_features:
-    name: cargo test (no features)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-      - run: cargo test
-
-  test_serde_feature:
-    name: cargo test (serde)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-      - run: cargo test --features serde
-
   # Check formatting with rustfmt
   formatting:
     name: cargo fmt
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       # Ensure rustfmt is installed and setup problem matcher
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           components: rustfmt
       - name: Rustfmt Check
         uses: actions-rust-lang/rustfmt@v1
+
+  test_all_ubuntu:
+    name: cargo test all features (ubuntu)
+    needs: formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - run: cargo test --all-features
+
+  test_ubuntu:
+    name: cargo test (ubuntu)
+    needs: formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - run: cargo test
+
+  test_all_macos12:
+    name: cargo test all features (macos 12)
+    needs:
+      - test_all_ubuntu
+      - test_ubuntu
+    runs-on: macos-12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - run: cargo test --all-features
+
+  test_all_macos14_arm64:
+    name: cargo test all features (macos 14 arm64)
+    needs:
+      - test_all_ubuntu
+      - test_ubuntu
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - run: cargo test --all-features
+
+  test_all_windows:
+    name: cargo test all features (windows)
+    needs:
+      - test_all_ubuntu
+      - test_ubuntu
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - run: cargo test --all-features
+
+  test_macos12:
+    name: cargo test (macos 12)
+    needs:
+      - test_all_ubuntu
+      - test_ubuntu
+    runs-on: macos-12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - run: cargo test
+
+  test_macos14_arm64:
+    name: cargo test (macos 14 arm64)
+    needs:
+      - test_all_ubuntu
+      - test_ubuntu
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - run: cargo test
+
+  test_windows:
+    name: cargo test (windows)
+    needs:
+      - test_all_ubuntu
+      - test_ubuntu
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - run: cargo test
