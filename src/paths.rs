@@ -19,7 +19,7 @@ use crate::{
 /// let paths_from_single_vec: Paths = vec![(0.0, 0.0), (5.0, 0.0), (5.0, 6.0), (0.0, 6.0)].into();
 /// let paths_from_vec_of_vecs: Paths = vec![vec![(0.0, 0.0), (5.0, 0.0), (5.0, 6.0), (0.0, 6.0)]].into();
 /// ```
-#[derive(Debug, Clone, Default, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -31,6 +31,13 @@ impl<P: PointScaler> Paths<P> {
     /// Create a new paths from a vector of paths.
     pub fn new(paths: Vec<Path<P>>) -> Self {
         Paths(paths)
+    }
+
+    /// In place push paths onto this set of paths.
+    pub fn push(&mut self, paths: impl Into<Paths<P>>) {
+        for path in paths.into() {
+            self.0.push(path);
+        }
     }
 
     /// Returns the number of paths.
@@ -398,7 +405,7 @@ mod test {
 
     #[test]
     fn test_from_custom_scaler() {
-        #[derive(Debug, Copy, Clone)]
+        #[derive(Debug, Clone, Copy, PartialEq, Hash)]
         struct CustomScaler;
 
         impl PointScaler for CustomScaler {

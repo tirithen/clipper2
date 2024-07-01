@@ -19,7 +19,7 @@ use crate::{
 /// let path_from_tuples: Path = vec![(0.0, 0.0), (5.0, 0.0), (5.0, 6.0), (0.0, 6.0)].into();
 /// let path_from_slices: Path = vec![[0.0, 0.0], [5.0, 0.0], [5.0, 6.0], [0.0, 6.0]].into();
 /// ```
-#[derive(Debug, Clone, Default, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq, Hash)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -27,10 +27,17 @@ use crate::{
 )]
 pub struct Path<P: PointScaler = Centi>(Vec<Point<P>>);
 
+impl<P: PointScaler> Eq for Path<P> {}
+
 impl<P: PointScaler> Path<P> {
     /// Create a new path from a vector of points.
     pub fn new(points: Vec<Point<P>>) -> Self {
         Path(points)
+    }
+
+    /// In place push point onto this path.
+    pub fn push(&mut self, point: impl Into<Point<P>>) {
+        self.0.push(point.into());
     }
 
     /// Returns the number of points in the path.
@@ -387,7 +394,7 @@ mod test {
 
     #[test]
     fn test_from_custom_scaler() {
-        #[derive(Debug, Copy, Clone)]
+        #[derive(Debug, Clone, Copy, PartialEq, Hash)]
         struct CustomScaler;
 
         impl PointScaler for CustomScaler {
