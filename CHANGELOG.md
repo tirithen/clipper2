@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.1](https://github.com/tirithen/clipper2/compare/v0.4.0...v0.4.1) (2024-07-30)
+
+
+### Features
+
+* add .push for Path and Paths ([3764676](https://github.com/tirithen/clipper2/commit/37646761f20c803e667f98f8ede7a68f49af6df3))
+
+
+### Bug Fixes
+
+* add bug fixes from Clipper2 C++ library ([58d2653](https://github.com/tirithen/clipper2/commit/58d2653ab6eee4a6841ce544b17cf2a73f1bad11))
+
 ## [0.4.0](https://github.com/tirithen/clipper2/compare/v0.3.0...v0.4.0) (2024-06-04)
 
 
