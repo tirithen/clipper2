@@ -19,7 +19,7 @@ usingz = ["clipper2c-sys/usingz"]
 
 [dependencies]
 libc = "0.2"
-clipper2c-sys = { path = "../clipper2c-sys" }
+clipper2c-sys = { rev = "210878394637f94bcd3a476bdf24ddf4ba8a39fd", git = "https://github.com/tirithen/clipper2c-sys" }
 thiserror = "1.0.59"
 serde = { version = "1", features = ["derive"], optional = true }
 
@@ -34,4 +34,3 @@ serde_json = "1"
 features = ["doc-images"]
 
 [patch.crates-io]
-# clipper2c-sys = { rev = "210878394637f94bcd3a476bdf24ddf4ba8a39fd", git = "https://github.com/tirithen/clipper2c-sys" }
