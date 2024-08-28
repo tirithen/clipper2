@@ -159,6 +159,19 @@ impl<P: PointScaler> Point<P> {
         )
     }
 
+    #[cfg(feature = "usingz")]
+    /// Create a new point with user data.
+    pub fn new_with_z(x: f64, y: f64, z: i64) -> Self {
+        Self(
+            ClipperPoint64 {
+                x: P::scale(x) as i64,
+                y: P::scale(y) as i64,
+                z,
+            },
+            PhantomData,
+        )
+    }
+
     /// Create a new point from scaled values, this means that point is
     /// constructed as is without applying the scaling multiplier.
     pub fn from_scaled(x: i64, y: i64) -> Self {
@@ -200,12 +213,6 @@ impl<P: PointScaler> Point<P> {
     /// Returns the user data of the point.
     pub fn z(&self) -> i64 {
         self.0.z
-    }
-
-    #[cfg(feature = "usingz")]
-    /// Sets the user data of the point.
-    pub fn set_z(&mut self, z: i64) {
-        self.0.z = z;
     }
 }
 

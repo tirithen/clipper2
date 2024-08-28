@@ -84,7 +84,6 @@ dependencies = [
 [[package]]
 name = "clipper2c-sys"
 version = "0.1.4"
-source = "git+https://github.com/tirithen/clipper2c-sys?rev=210878394637f94bcd3a476bdf24ddf4ba8a39fd#210878394637f94bcd3a476bdf24ddf4ba8a39fd"
 dependencies = [
  "cc",
  "libc",

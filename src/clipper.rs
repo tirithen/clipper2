@@ -132,7 +132,7 @@ impl<P: PointScaler> Clipper<NoSubjects, P> {
     ///
     /// let mut clipper = Clipper::<NoSubjects, Centi>::new();
     /// clipper.set_z_callback(|_: Point<_>, _: Point<_>, _: Point<_>, _: Point<_>, p: &mut Point<_>| {
-    ///     p.set_z(1);
+    ///     *p = Point::new_with_z(p.x(), p.y(), 1);
     /// });
     /// ```
     pub fn set_z_callback(
@@ -460,7 +460,7 @@ mod test {
                       _e2bot: Point<_>,
                       _e2top: Point<_>,
                       p: &mut Point<_>| {
-                    p.set_z(1);
+                    *p = Point::new_with_z(p.x(), p.y(), 1);
                     success.set(true);
                 },
             );
