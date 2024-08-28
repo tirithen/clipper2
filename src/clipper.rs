@@ -3,10 +3,10 @@ use std::marker::PhantomData;
 use clipper2c_sys::{
     clipper_clipper64, clipper_clipper64_add_clip, clipper_clipper64_add_open_subject,
     clipper_clipper64_add_subject, clipper_clipper64_execute, clipper_clipper64_size,
-    clipper_delete_clipper64, clipper_delete_paths64, ClipperClipper64, ClipperPoint64,
+    clipper_delete_clipper64, clipper_delete_paths64, ClipperClipper64,
 };
 
-use crate::{malloc, Centi, ClipType, FillRule, Paths, Point, PointScaler};
+use crate::{malloc, Centi, ClipType, FillRule, Paths, PointScaler};
 
 /// The state of the Clipper struct.
 pub trait ClipperState {}
@@ -137,8 +137,16 @@ impl<P: PointScaler> Clipper<NoSubjects, P> {
     /// ```
     pub fn set_z_callback(
         &mut self,
-        callback: impl Fn(Point<P>, Point<P>, Point<P>, Point<P>, &mut Point<P>),
+        callback: impl Fn(
+            crate::Point<P>,
+            crate::Point<P>,
+            crate::Point<P>,
+            crate::Point<P>,
+            &mut crate::Point<P>,
+        ),
     ) {
+        use crate::Point;
+
         // The closure will be represented by a trait object behind a fat
         // pointer. Since fat pointers are larger than thin pointers, they
         // cannot be passed through a thin-pointer c_void type. We must
@@ -164,17 +172,20 @@ impl<P: PointScaler> Clipper<NoSubjects, P> {
     }
 }
 
+#[cfg(feature = "usingz")]
 extern "C" fn handle_set_z_callback<P: PointScaler>(
     user_data: *mut ::std::os::raw::c_void,
-    e1bot: *const ClipperPoint64,
-    e1top: *const ClipperPoint64,
-    e2bot: *const ClipperPoint64,
-    e2top: *const ClipperPoint64,
-    pt: *mut ClipperPoint64,
+    e1bot: *const clipper2c_sys::ClipperPoint64,
+    e1top: *const clipper2c_sys::ClipperPoint64,
+    e2bot: *const clipper2c_sys::ClipperPoint64,
+    e2top: *const clipper2c_sys::ClipperPoint64,
+    pt: *mut clipper2c_sys::ClipperPoint64,
 ) {
+    use crate::Point;
+
     // SAFETY: user_data was set in set_z_callback, and is valid for as long as
     // the Clipper2 instance exists.
-    let callback: &mut &mut dyn Fn(Point<P>, Point<P>, Point<P>, Point<P>, &mut Point<P>) =
+    let callback: &mut &mut dyn Fn(Point<P>, Point<P>, Point<P>, Point<P>, &mut crate::Point<P>) =
         unsafe { std::mem::transmute(user_data) };
 
     // SAFETY: Clipper2 should produce valid pointers
@@ -431,13 +442,14 @@ pub enum ClipperError {
 
 #[cfg(test)]
 mod test {
-    use std::{cell::Cell, rc::Rc};
-
-    use super::*;
-
     #[cfg(feature = "usingz")]
     #[test]
     fn test_set_z_callback() {
+        use std::{cell::Cell, rc::Rc};
+
+        use super::*;
+        use crate::Point;
+
         let mut clipper = Clipper::<NoSubjects, Centi>::new();
         let success = Rc::new(Cell::new(false));
         {
