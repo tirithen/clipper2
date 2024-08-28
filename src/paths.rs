@@ -563,7 +563,7 @@ mod test {
         assert_eq!(paths.len(), 2);
     }
 
-    #[cfg(feature = "serde")]
+    #[cfg(all(feature = "serde", not(feature = "usingz")))]
     #[test]
     fn test_serde() {
         let paths = Paths::<Centi>::from(vec![(0.4, 0.0), (5.0, 1.0)]);

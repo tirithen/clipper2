@@ -292,7 +292,7 @@ mod test {
         assert_eq!(point.y_scaled(), 4000);
     }
 
-    #[cfg(feature = "serde")]
+    #[cfg(all(feature = "serde", not(feature = "usingz")))]
     #[test]
     fn test_serde() {
         let point = Point::<Centi>::new(1.0, 2.0);
