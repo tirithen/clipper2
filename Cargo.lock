@@ -84,8 +84,7 @@ dependencies = [
 [[package]]
 name = "clipper2c-sys"
 version = "0.1.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e2995248c63ec82bf22c921cfd26fe407a4402b7039e045d286f7470cd83fe9e"
+source = "git+https://github.com/tirithen/clipper2c-sys?rev=210878394637f94bcd3a476bdf24ddf4ba8a39fd#210878394637f94bcd3a476bdf24ddf4ba8a39fd"
 dependencies = [
  "cc",
  "libc",

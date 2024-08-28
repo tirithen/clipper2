@@ -15,6 +15,7 @@ categories = ["algorithms"]
 default = ["doc-images"]
 doc-images = []
 serde = ["dep:serde", "clipper2c-sys/serde"]
+usingz = ["clipper2c-sys/usingz"]
 
 [dependencies]
 libc = "0.2"
@@ -31,3 +32,6 @@ serde_json = "1"
 # docs.rs uses a nightly compiler, so by instructing it to use our `doc-images` feature we
 # ensure that it will render any images that we may have in inner attribute documentation.
 features = ["doc-images"]
+
+[patch.crates-io]
+clipper2c-sys = { rev = "210878394637f94bcd3a476bdf24ddf4ba8a39fd", git = "https://github.com/tirithen/clipper2c-sys" }

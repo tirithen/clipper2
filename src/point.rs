@@ -97,9 +97,15 @@ pub struct Point<P: PointScaler = Centi>(
 );
 
 impl<P: PointScaler> Point<P> {
+    #[cfg(not(feature = "usingz"))]
     /// The zero point.
     pub const ZERO: Self = Self(ClipperPoint64 { x: 0, y: 0 }, PhantomData);
 
+    #[cfg(feature = "usingz")]
+    /// The zero point.
+    pub const ZERO: Self = Self(ClipperPoint64 { x: 0, y: 0, z: 0 }, PhantomData);
+
+    #[cfg(not(feature = "usingz"))]
     /// The minimum value for a point.
     pub const MIN: Self = Self(
         ClipperPoint64 {
@@ -109,11 +115,34 @@ impl<P: PointScaler> Point<P> {
         PhantomData,
     );
 
+    #[cfg(feature = "usingz")]
+    /// The minimum value for a point.
+    pub const MIN: Self = Self(
+        ClipperPoint64 {
+            x: i64::MIN,
+            y: i64::MIN,
+            z: 0,
+        },
+        PhantomData,
+    );
+
+    #[cfg(not(feature = "usingz"))]
     /// The maximum value for a point.
     pub const MAX: Self = Self(
         ClipperPoint64 {
             x: i64::MAX,
             y: i64::MAX,
+        },
+        PhantomData,
+    );
+
+    #[cfg(feature = "usingz")]
+    /// The maximum value for a point.
+    pub const MAX: Self = Self(
+        ClipperPoint64 {
+            x: i64::MAX,
+            y: i64::MAX,
+            z: 0,
         },
         PhantomData,
     );
@@ -124,6 +153,7 @@ impl<P: PointScaler> Point<P> {
             ClipperPoint64 {
                 x: P::scale(x) as i64,
                 y: P::scale(y) as i64,
+                ..Default::default()
             },
             PhantomData,
         )
@@ -132,7 +162,14 @@ impl<P: PointScaler> Point<P> {
     /// Create a new point from scaled values, this means that point is
     /// constructed as is without applying the scaling multiplier.
     pub fn from_scaled(x: i64, y: i64) -> Self {
-        Self(ClipperPoint64 { x, y }, PhantomData)
+        Self(
+            ClipperPoint64 {
+                x,
+                y,
+                ..Default::default()
+            },
+            PhantomData,
+        )
     }
 
     /// Returns the x coordinate of the point.
@@ -157,6 +194,18 @@ impl<P: PointScaler> Point<P> {
 
     pub(crate) fn as_clipperpoint64(&self) -> *const ClipperPoint64 {
         &self.0
+    }
+
+    #[cfg(feature = "usingz")]
+    /// Returns the user data of the point.
+    pub fn z(&self) -> i64 {
+        self.0.z
+    }
+
+    #[cfg(feature = "usingz")]
+    /// Sets the user data of the point.
+    pub fn set_z(&mut self, z: i64) {
+        self.0.z = z;
     }
 }
 

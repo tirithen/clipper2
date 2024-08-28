@@ -322,6 +322,7 @@ impl<P: PointScaler> Path<P> {
                 .map(|point: Point<P>| ClipperPoint64 {
                     x: point.x_scaled(),
                     y: point.y_scaled(),
+                    ..Default::default()
                 })
                 .collect::<Vec<_>>()
                 .as_mut_ptr(),
