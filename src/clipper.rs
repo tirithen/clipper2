@@ -33,6 +33,10 @@ pub struct Clipper<S: ClipperState = NoSubjects, P: PointScaler = Centi> {
     keep_ptr_on_drop: bool,
     _marker: PhantomData<P>,
     _state: S,
+
+    /// We only hold on to this in order to avoid leaking memory when Clipper is dropped
+    #[cfg(feature = "usingz")]
+    raw_z_callback: Option<*mut libc::c_void>,
 }
 
 impl<P: PointScaler> Clipper<NoSubjects, P> {
@@ -48,6 +52,9 @@ impl<P: PointScaler> Clipper<NoSubjects, P> {
             keep_ptr_on_drop: false,
             _marker: PhantomData,
             _state: NoSubjects {},
+
+            #[cfg(feature = "usingz")]
+            raw_z_callback: None,
         }
     }
 }
@@ -72,6 +79,9 @@ impl<P: PointScaler> Clipper<NoSubjects, P> {
             keep_ptr_on_drop: false,
             _marker: PhantomData,
             _state: WithSubjects {},
+
+            #[cfg(feature = "usingz")]
+            raw_z_callback: None,
         };
 
         drop(self);
@@ -98,11 +108,98 @@ impl<P: PointScaler> Clipper<NoSubjects, P> {
             keep_ptr_on_drop: false,
             _marker: PhantomData,
             _state: WithSubjects {},
+
+            #[cfg(feature = "usingz")]
+            raw_z_callback: None,
         };
 
         drop(self);
 
         clipper.add_open_subject(subject)
+    }
+
+    #[cfg(feature = "usingz")]
+    /// Allows specifying a callback that will be called each time a new vertex
+    /// is created by Clipper, in order to set user data on such points. New
+    /// points are created at the intersections between two edges, and the
+    /// callback will be called with the four neighboring points from those two
+    /// edges. The last argument is the new point itself.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use clipper2::*;
+    ///
+    /// let mut clipper = Clipper::<NoSubjects, Centi>::new();
+    /// clipper.set_z_callback(|_: Point<_>, _: Point<_>, _: Point<_>, _: Point<_>, p: &mut Point<_>| {
+    ///     *p = Point::new_with_z(p.x(), p.y(), 1);
+    /// });
+    /// ```
+    pub fn set_z_callback(
+        &mut self,
+        callback: impl Fn(
+            crate::Point<P>,
+            crate::Point<P>,
+            crate::Point<P>,
+            crate::Point<P>,
+            &mut crate::Point<P>,
+        ),
+    ) {
+        use crate::Point;
+
+        // The closure will be represented by a trait object behind a fat
+        // pointer. Since fat pointers are larger than thin pointers, they
+        // cannot be passed through a thin-pointer c_void type. We must
+        // therefore wrap the fat pointer in another box, leading to this double
+        // indirection.
+        let cb: Box<Box<dyn Fn(Point<P>, Point<P>, Point<P>, Point<P>, &mut Point<P>)>> =
+            Box::new(Box::new(callback));
+        let raw_cb = Box::into_raw(cb) as *mut _;
+
+        // It there is an old callback stored, drop it before replacing it
+        if let Some(old_raw_cb) = self.raw_z_callback {
+            drop(unsafe { Box::from_raw(old_raw_cb as *mut _) });
+        }
+        self.raw_z_callback = Some(raw_cb);
+
+        unsafe {
+            clipper2c_sys::clipper_clipper64_set_z_callback(
+                self.ptr,
+                raw_cb,
+                Some(handle_set_z_callback::<P>),
+            );
+        }
+    }
+}
+
+#[cfg(feature = "usingz")]
+extern "C" fn handle_set_z_callback<P: PointScaler>(
+    user_data: *mut ::std::os::raw::c_void,
+    e1bot: *const clipper2c_sys::ClipperPoint64,
+    e1top: *const clipper2c_sys::ClipperPoint64,
+    e2bot: *const clipper2c_sys::ClipperPoint64,
+    e2top: *const clipper2c_sys::ClipperPoint64,
+    pt: *mut clipper2c_sys::ClipperPoint64,
+) {
+    use crate::Point;
+
+    // SAFETY: user_data was set in set_z_callback, and is valid for as long as
+    // the Clipper2 instance exists.
+    let callback: &mut &mut dyn Fn(Point<P>, Point<P>, Point<P>, Point<P>, &mut crate::Point<P>) =
+        unsafe { std::mem::transmute(user_data) };
+
+    // SAFETY: Clipper2 should produce valid pointers
+    let mut new_point = unsafe { Point::<P>::from(*pt) };
+    let e1bot = unsafe { Point::<P>::from(*e1bot) };
+    let e1top = unsafe { Point::<P>::from(*e1top) };
+    let e2bot = unsafe { Point::<P>::from(*e2bot) };
+    let e2top = unsafe { Point::<P>::from(*e2top) };
+
+    callback(e1bot, e1top, e2bot, e2top, &mut new_point);
+
+    // SAFETY: pt is a valid pointer and new_point is not null
+    unsafe {
+        *pt = *new_point.as_clipperpoint64();
     }
 }
 
@@ -171,6 +268,9 @@ impl<P: PointScaler> Clipper<WithSubjects, P> {
             keep_ptr_on_drop: false,
             _marker: PhantomData,
             _state: WithClips {},
+
+            #[cfg(feature = "usingz")]
+            raw_z_callback: None,
         };
 
         drop(self);
@@ -321,6 +421,13 @@ impl<S: ClipperState, P: PointScaler> Drop for Clipper<S, P> {
     fn drop(&mut self) {
         if !self.keep_ptr_on_drop {
             unsafe { clipper_delete_clipper64(self.ptr) }
+
+            #[cfg(feature = "usingz")]
+            {
+                if let Some(raw_cb) = self.raw_z_callback {
+                    drop(unsafe { Box::from_raw(raw_cb as *mut _) });
+                }
+            }
         }
     }
 }
@@ -331,4 +438,49 @@ pub enum ClipperError {
     /// Failed execute boolean operation.
     #[error("Failed boolean operation")]
     FailedBooleanOperation,
+}
+
+#[cfg(test)]
+mod test {
+    #[cfg(feature = "usingz")]
+    #[test]
+    fn test_set_z_callback() {
+        use std::{cell::Cell, rc::Rc};
+
+        use super::*;
+        use crate::Point;
+
+        let mut clipper = Clipper::<NoSubjects, Centi>::new();
+        let success = Rc::new(Cell::new(false));
+        {
+            let success = success.clone();
+            clipper.set_z_callback(
+                move |_e1bot: Point<_>,
+                      _e1top: Point<_>,
+                      _e2bot: Point<_>,
+                      _e2top: Point<_>,
+                      p: &mut Point<_>| {
+                    *p = Point::new_with_z(p.x(), p.y(), 1);
+                    success.set(true);
+                },
+            );
+        }
+        let e1: Paths = vec![(0.0, 0.0), (2.0, 2.0), (0.0, 2.0)].into();
+        let e2: Paths = vec![(1.0, 0.0), (2.0, 0.0), (1.0, 2.0)].into();
+        let paths = clipper
+            .add_subject(e1)
+            .add_clip(e2)
+            .union(FillRule::default())
+            .unwrap();
+
+        assert_eq!(success.get(), true);
+
+        let n_intersecting = paths
+            .iter()
+            .flatten()
+            .into_iter()
+            .filter(|v| v.z() == 1)
+            .count();
+        assert_eq!(n_intersecting, 3);
+    }
 }

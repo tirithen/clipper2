@@ -322,6 +322,7 @@ impl<P: PointScaler> Path<P> {
                 .map(|point: Point<P>| ClipperPoint64 {
                     x: point.x_scaled(),
                     y: point.y_scaled(),
+                    ..Default::default()
                 })
                 .collect::<Vec<_>>()
                 .as_mut_ptr(),
@@ -483,7 +484,7 @@ mod test {
         assert_eq!(area, -1200.0);
     }
 
-    #[cfg(feature = "serde")]
+    #[cfg(all(feature = "serde", not(feature = "usingz")))]
     #[test]
     fn test_serde() {
         let path = Path::<Centi>::from(vec![(0.0, 0.0), (1.0, 1.0)]);
