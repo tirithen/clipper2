@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.5.0](https://github.com/tirithen/clipper2/compare/v0.4.1...v0.5.0) (2025-01-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* **Path:** Path<P>::inflate now returns Paths<P> instead of
+Path<P>. The method will no longer panic when 0 points remain after
+inflating with a negative number, instead a Paths<p> struct with length
+0 will be returned in those cases.
+
+### Features
+
+* **Path:** Path<P>::inflate return Paths<P> ([cbb999b](https://github.com/tirithen/clipper2/commit/cbb999bcb964afed4d36f455711def0fe3346f55))
+
 ### [0.4.1](https://github.com/tirithen/clipper2/compare/v0.4.0...v0.4.1) (2024-07-30)
 
 
