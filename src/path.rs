@@ -5,7 +5,7 @@ use clipper2c_sys::{
 };
 
 use crate::{
-    inflate, malloc, point_in_polygon, Bounds, Centi, EndType, JoinType, Point,
+    inflate, malloc, point_in_polygon, Bounds, Centi, EndType, JoinType, Paths, Point,
     PointInPolygonResult, PointScaler,
 };
 
@@ -194,12 +194,16 @@ impl<P: PointScaler> Path<P> {
         bounds
     }
 
-    /// Construct a new path offset from this one by a delta distance.
+    /// Construct a paths offset from this one by a delta distance.
     ///
     /// For closed paths passing a positive delta number will inflate the path
     /// where passing a negative number will shrink the path.
     ///
-    /// **NOTE:** Inflate calls will frequently generate a large amount of very
+    /// **NOTE 1:** This method returns [`Paths<P>`](struct.Paths.html) instead
+    /// of `Path<P>` as inflating a path might cause the path to split into
+    /// several paths, or implode the complete path leaving no points in it.
+    ///
+    /// **NOTE 2:** Inflate calls will frequently generate a large amount of very
     /// close extra points and it is therefore recommented to almost always call
     /// [`Path::simplify`] on the path after inflating/deflating it.
     ///
@@ -209,7 +213,7 @@ impl<P: PointScaler> Path<P> {
     /// use clipper2::*;
     ///
     /// let path: Path = vec![(0.0, 0.0), (5.0, 0.0), (5.0, 6.0), (0.0, 6.0)].into();
-    /// let inflated = path
+    /// let inflated_paths = path
     ///     .inflate(1.0, JoinType::Square, EndType::Polygon, 2.0)
     ///     .simplify(0.01, false);
     /// ```
@@ -221,12 +225,8 @@ impl<P: PointScaler> Path<P> {
         join_type: JoinType,
         end_type: EndType,
         miter_limit: f64,
-    ) -> Self {
+    ) -> Paths<P> {
         inflate(self.clone(), delta, join_type, end_type, miter_limit)
-            .iter()
-            .next()
-            .unwrap()
-            .clone()
     }
 
     /// Construct a new path from this one but with a reduced set of points.
@@ -384,6 +384,17 @@ impl<P: PointScaler> From<Vec<[f64; 2]>> for Path<P> {
 #[cfg(test)]
 mod test {
     use super::*;
+
+    #[test]
+    fn test_negative_inflate_removing_imploded_paths() {
+        let path: Path = vec![(0.0, 0.0), (5.0, 0.0), (5.0, 6.0), (0.0, 6.0)].into();
+        let delta = -3.0;
+        let result = path
+            .inflate(delta, JoinType::Round, EndType::Polygon, 0.0)
+            .simplify(0.01, false);
+
+        assert_eq!(result.len(), 0);
+    }
 
     #[test]
     fn test_from() {
