@@ -19,11 +19,11 @@ serde = ["dep:serde", "clipper2c-sys/serde"]
 [dependencies]
 libc = "0.2"
 clipper2c-sys = "0.1.4"
-thiserror = "1.0.59"
+thiserror = "2"
 serde = { version = "1", features = ["derive"], optional = true }
 
 [dev-dependencies]
-macroquad = "0.4.5"
+macroquad = "0.4.13"
 embed-doc-image = "0.1"
 serde_json = "1"
 
