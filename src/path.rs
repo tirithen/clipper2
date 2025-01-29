@@ -383,7 +383,32 @@ impl<P: PointScaler> From<Vec<[f64; 2]>> for Path<P> {
 
 #[cfg(test)]
 mod test {
+    use crate::Deci;
+
     use super::*;
+
+    #[test]
+    fn test_default() {
+        let path: Path = Path::default();
+        assert_eq!(path.len(), 0);
+    }
+
+    #[test]
+    fn test_default_deci_precision() {
+        let path = Path::<Deci>::default();
+        assert_eq!(path.len(), 0);
+    }
+
+    #[test]
+    fn test_default_as_struct_field() {
+        #[derive(Default)]
+        struct Foo {
+            path: Path,
+        }
+
+        let path = Foo::default();
+        assert_eq!(path.path.len(), 0);
+    }
 
     #[test]
     fn test_negative_inflate_removing_imploded_paths() {
@@ -405,7 +430,7 @@ mod test {
 
     #[test]
     fn test_from_custom_scaler() {
-        #[derive(Debug, Clone, Copy, PartialEq, Hash)]
+        #[derive(Debug, Default, Clone, Copy, PartialEq, Hash)]
         struct CustomScaler;
 
         impl PointScaler for CustomScaler {

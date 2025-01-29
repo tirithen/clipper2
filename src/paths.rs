@@ -19,7 +19,7 @@ use crate::{
 /// let paths_from_single_vec: Paths = vec![(0.0, 0.0), (5.0, 0.0), (5.0, 6.0), (0.0, 6.0)].into();
 /// let paths_from_vec_of_vecs: Paths = vec![vec![(0.0, 0.0), (5.0, 0.0), (5.0, 6.0), (0.0, 6.0)]].into();
 /// ```
-#[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
+#[derive(Debug, Default, Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -386,7 +386,32 @@ impl<P: PointScaler> From<Vec<Path<P>>> for Paths<P> {
 
 #[cfg(test)]
 mod test {
+    use crate::Deci;
+
     use super::*;
+
+    #[test]
+    fn test_default() {
+        let paths: Paths = Paths::default();
+        assert_eq!(paths.len(), 0);
+    }
+
+    #[test]
+    fn test_default_deci_precision() {
+        let paths = Paths::<Deci>::default();
+        assert_eq!(paths.len(), 0);
+    }
+
+    #[test]
+    fn test_default_as_struct_field() {
+        #[derive(Default)]
+        struct Foo {
+            paths: Paths,
+        }
+
+        let paths = Foo::default();
+        assert_eq!(paths.paths.len(), 0);
+    }
 
     #[test]
     fn test_from() {
@@ -405,7 +430,7 @@ mod test {
 
     #[test]
     fn test_from_custom_scaler() {
-        #[derive(Debug, Clone, Copy, PartialEq, Hash)]
+        #[derive(Debug, Default, Clone, Copy, PartialEq, Hash)]
         struct CustomScaler;
 
         impl PointScaler for CustomScaler {

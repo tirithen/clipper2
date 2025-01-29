@@ -8,7 +8,7 @@ use clipper2c_sys::ClipperPoint64;
 /// The default multiplier is `Centi`, and others are provided by the library,
 /// but if needed the user can create a custom scaler struct that implements
 /// `PointScaler`.
-pub trait PointScaler: Clone + Copy + PartialEq + std::hash::Hash {
+pub trait PointScaler: Default + Clone + Copy + PartialEq + std::hash::Hash {
     /// The point multiplier. This is set to a custom value when implementing
     /// the `PointScaler` trait.
     const MULTIPLIER: f64;
@@ -25,7 +25,7 @@ pub trait PointScaler: Clone + Copy + PartialEq + std::hash::Hash {
 }
 
 /// No scaling.
-#[derive(Debug, Copy, Clone, PartialEq, Hash)]
+#[derive(Debug, Default, Copy, Clone, PartialEq, Hash)]
 pub struct One;
 
 impl PointScaler for One {
@@ -33,7 +33,7 @@ impl PointScaler for One {
 }
 
 /// Scale by 10.
-#[derive(Debug, Copy, Clone, PartialEq, Hash)]
+#[derive(Debug, Default, Copy, Clone, PartialEq, Hash)]
 pub struct Deci;
 
 impl PointScaler for Deci {
@@ -41,7 +41,7 @@ impl PointScaler for Deci {
 }
 
 /// Scale by 100. This is the default.
-#[derive(Debug, Copy, Clone, PartialEq, Hash)]
+#[derive(Debug, Default, Copy, Clone, PartialEq, Hash)]
 pub struct Centi;
 
 impl PointScaler for Centi {
@@ -49,7 +49,7 @@ impl PointScaler for Centi {
 }
 
 /// Scale by 1000.
-#[derive(Debug, Copy, Clone, PartialEq, Hash)]
+#[derive(Debug, Default, Copy, Clone, PartialEq, Hash)]
 pub struct Milli;
 
 impl PointScaler for Milli {
@@ -229,7 +229,7 @@ mod test {
 
     #[test]
     fn test_point_custom_scaler() {
-        #[derive(Debug, Clone, Copy, PartialEq, Hash)]
+        #[derive(Debug, Default, Clone, Copy, PartialEq, Hash)]
         struct CustomScaler;
 
         impl PointScaler for CustomScaler {
