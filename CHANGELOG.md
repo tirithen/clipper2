@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.1](https://github.com/tirithen/clipper2/compare/v0.5.0...v0.5.1) (2025-01-29)
+
+
+### Features
+
+* impl Default for points and paths ([cc77f7b](https://github.com/tirithen/clipper2/commit/cc77f7b4f9560a048cdf27764b079622c130927a))
+
 ## [0.5.0](https://github.com/tirithen/clipper2/compare/v0.4.1...v0.5.0) (2025-01-21)
 
 
