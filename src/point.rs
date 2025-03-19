@@ -155,6 +155,11 @@ impl<P: PointScaler> Point<P> {
         self.0.y
     }
 
+    /// Calculate the distance to another point.
+    pub fn distance_to(&self, to: &Self) -> f64 {
+        (((self.0.x - to.0.x).pow(2) + (self.0.y - to.0.y).pow(2)) as f64).sqrt()
+    }
+
     pub(crate) fn as_clipperpoint64(&self) -> *const ClipperPoint64 {
         &self.0
     }
