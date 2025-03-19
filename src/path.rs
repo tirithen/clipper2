@@ -281,6 +281,34 @@ impl<P: PointScaler> Path<P> {
         point_in_polygon(point, self)
     }
 
+    /// The function returns true if all points in a given path is inside this
+    /// path.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use clipper2::*;
+    ///
+    /// let path_outer: Path = vec![(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)].into();
+    /// let path_inner: Path = vec![(0.2, 0.2), (0.8, 0.2), (0.8, 0.8), (0.2, 0.8)].into();
+    /// let path_external: Path = vec![(12.2, 0.2), (0.8, 0.2), (0.8, 0.8), (0.2, 0.8)].into();
+    ///
+    /// let output = path_outer.surrounds_path(&path_inner);
+    /// assert_eq!(output, true);
+    ///
+    /// let output = path_outer.surrounds_path(&path_external);
+    /// assert_eq!(output, false);
+    /// ```
+    pub fn surrounds_path(&self, path: &Path<P>) -> bool {
+        for p in path {
+            if self.is_point_inside(*p) != PointInPolygonResult::IsInside {
+                return false;
+            }
+        }
+
+        true
+    }
+
     /// This function returns the area of the supplied polygon. It's assumed
     /// that the path is closed and does not self-intersect.
     ///
