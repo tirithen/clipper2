@@ -336,6 +336,33 @@ impl<P: PointScaler> Path<P> {
         unsafe { clipper_path64_area(self.to_clipperpath64()) / (P::MULTIPLIER * P::MULTIPLIER) }
     }
 
+    /// Returns the closest point on the path to a given point
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use clipper2::*;
+    ///
+    /// let path: Path = vec![(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)].into();
+    /// let closest_point = path.closest_point(Point::new(0.3, 0.3));
+    /// assert_eq!(closest_point, (Point::new(0.0, 0.0), 0.4242640687119285));
+    /// ```
+    pub fn closest_point(&self, point: impl Into<Point<P>>) -> (Point<P>, f64) {
+        let point = point.into();
+        let mut closest_point = Point::MAX;
+        let mut closest_distance = f64::MAX;
+
+        for p in self.iter() {
+            let distance = p.distance_to(&point);
+            if distance < closest_distance {
+                closest_point = *p;
+                closest_distance = distance;
+            }
+        }
+
+        (closest_point, closest_distance)
+    }
+
     pub(crate) fn from_clipperpath64(ptr: *mut ClipperPath64) -> Self {
         let paths = unsafe {
             let len: i32 = clipper_path64_length(ptr).try_into().unwrap();
@@ -551,5 +578,12 @@ mod test {
 
         let deserialized: Path = serde_json::from_str(&serialized).unwrap();
         assert_eq!(deserialized, path);
+    }
+
+    #[test]
+    fn test_closest_point() {
+        let path = Path::<Centi>::rectangle(10.0, 5.0, 30.0, 30.0);
+        let closest_point = path.closest_point(Point::new(15.0, 7.0));
+        assert_eq!(closest_point, (Point::new(10.0, 5.0), 5.385164807134504));
     }
 }
