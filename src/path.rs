@@ -40,6 +40,12 @@ impl<P: PointScaler> Path<P> {
         self.0.push(point.into());
     }
 
+    /// Append another path onto this one, cloning the other path.
+    pub fn append(&mut self, path: impl Into<Vec<Point<P>>>) {
+        let mut points = path.into();
+        self.0.append(&mut points);
+    }
+
     /// Returns the number of points in the path.
     pub fn len(&self) -> usize {
         self.0.len()
