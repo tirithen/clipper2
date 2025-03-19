@@ -157,7 +157,7 @@ impl<P: PointScaler> Point<P> {
 
     /// Calculate the distance to another point.
     pub fn distance_to(&self, to: &Self) -> f64 {
-        (((self.0.x - to.0.x).pow(2) + (self.0.y - to.0.y).pow(2)) as f64).sqrt()
+        ((self.x() - to.x()).powf(2.0) + (self.y() - to.y()).powf(2.0)).sqrt()
     }
 
     pub(crate) fn as_clipperpoint64(&self) -> *const ClipperPoint64 {
@@ -257,5 +257,12 @@ mod test {
 
         let deserialized: Point<Centi> = serde_json::from_str(&serialized).unwrap();
         assert_eq!(point, deserialized);
+    }
+
+    #[test]
+    fn test_distance_to() {
+        let point1 = Point::<Centi>::new(1.0, 2.0);
+        let point2 = Point::<Centi>::new(3.0, 4.0);
+        assert_eq!(point1.distance_to(&point2), 2.8284271247461903);
     }
 }
