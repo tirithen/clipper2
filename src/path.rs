@@ -363,6 +363,26 @@ impl<P: PointScaler> Path<P> {
         (closest_point, closest_distance)
     }
 
+    /// Shifts a given point to become the first point in the array
+    ///
+    /// ```rust
+    /// use clipper2::*;
+    ///
+    /// let mut path = Path::<Centi>::rectangle(-20.0, 25.0, -40.0, 30.0);
+    /// path.shift_start_to(Point::new(-60.0, 25.0)).expect("Path not shifted");
+    /// ```
+    pub fn shift_start_to(&mut self, point: Point<P>) -> Result<(), PathError> {
+        if let Some(index) = self.iter().position(|p| *p == point) {
+            self.0.rotate_left(index);
+            return Ok(());
+        }
+
+        Err(PathError::PointNotInPath {
+            x: point.x(),
+            y: point.y(),
+        })
+    }
+
     pub(crate) fn from_clipperpath64(ptr: *mut ClipperPath64) -> Self {
         let paths = unsafe {
             let len: i32 = clipper_path64_length(ptr).try_into().unwrap();
@@ -440,6 +460,19 @@ impl<P: PointScaler> From<Vec<[f64; 2]>> for Path<P> {
     fn from(points: Vec<[f64; 2]>) -> Self {
         Path::<P>::new(points.iter().map(Point::<P>::from).collect())
     }
+}
+
+/// Path related errors
+#[derive(Debug, thiserror::Error, PartialEq)]
+pub enum PathError {
+    /// The given point is not within (one of the points of) the given path
+    #[error("Point ({x}, {y}) is not in path")]
+    PointNotInPath {
+        /// x coordinate of the point not within the path
+        x: f64,
+        /// y coordinate of the point not within the path
+        y: f64,
+    },
 }
 
 #[cfg(test)]
@@ -578,6 +611,34 @@ mod test {
 
         let deserialized: Path = serde_json::from_str(&serialized).unwrap();
         assert_eq!(deserialized, path);
+    }
+
+    #[test]
+    fn test_shift_start_to() {
+        let mut path = Path::<Centi>::rectangle(-20.0, 25.0, -40.0, 30.0);
+        let mut iter = path.iter();
+        assert_eq!(iter.next(), Some(&Point::new(-20.0, 25.0)));
+        assert_eq!(iter.next(), Some(&Point::new(-60.0, 25.0)));
+        assert_eq!(iter.next(), Some(&Point::new(-60.0, 55.0)));
+        assert_eq!(iter.next(), Some(&Point::new(-20.0, 55.0)));
+        assert_eq!(iter.next(), None);
+
+        let path_shift_result = path.shift_start_to(Point::new(-660.0, 155.0));
+        assert_eq!(
+            path_shift_result.err(),
+            Some(PathError::PointNotInPath {
+                x: -660.0,
+                y: 155.0
+            })
+        );
+
+        path.shift_start_to(Point::new(-60.0, 55.0)).unwrap();
+        let mut iter = path.iter();
+        assert_eq!(iter.next(), Some(&Point::new(-60.0, 55.0)));
+        assert_eq!(iter.next(), Some(&Point::new(-20.0, 55.0)));
+        assert_eq!(iter.next(), Some(&Point::new(-20.0, 25.0)));
+        assert_eq!(iter.next(), Some(&Point::new(-60.0, 25.0)));
+        assert_eq!(iter.next(), None);
     }
 
     #[test]
