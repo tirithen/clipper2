@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.2](https://github.com/tirithen/clipper2/compare/v0.5.1...v0.5.2) (2025-03-19)
+
+
+### Features
+
+* **path:** add path.append(other_path) ([d17cf53](https://github.com/tirithen/clipper2/commit/d17cf5392e394cde76d2acd3596070467b430921))
+* **path:** add path.closest_point(point) method ([cc06ddf](https://github.com/tirithen/clipper2/commit/cc06ddf6fc01187fd80808e96e17ccbf6a6f0dfa))
+* **path:** add path.shift_start_to(point) method ([04e29bd](https://github.com/tirithen/clipper2/commit/04e29bd05508f5e40ef529da5d70752a404b9ddb))
+* **path:** add path.surrounds_path(path) method ([736f50c](https://github.com/tirithen/clipper2/commit/736f50ca31ece155ba8018184ddfe8447a6e2462))
+* **paths:** add paths.append(other_paths) ([5b8b842](https://github.com/tirithen/clipper2/commit/5b8b84288d4cfae8958ae7e96934bc898b784d96))
+* **point:** add point.distance_to(other_point) ([0ba5baf](https://github.com/tirithen/clipper2/commit/0ba5bafc2e00cafaff46a71d9872068cf5ccfd09))
+
+
+### Bug Fixes
+
+* **point:** fix distance_to measurement ([0332d01](https://github.com/tirithen/clipper2/commit/0332d0123d2c8d9fe12636d027c0b4ec0a275ada))
+
 ### [0.5.1](https://github.com/tirithen/clipper2/compare/v0.5.0...v0.5.1) (2025-01-29)
 
 
