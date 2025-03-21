@@ -122,8 +122,8 @@ impl<P: PointScaler> Point<P> {
     pub fn new(x: f64, y: f64) -> Self {
         Self(
             ClipperPoint64 {
-                x: P::scale(x) as i64,
-                y: P::scale(y) as i64,
+                x: P::scale(x).round() as i64,
+                y: P::scale(y).round() as i64,
             },
             PhantomData,
         )
@@ -230,6 +230,13 @@ mod test {
         assert_eq!(point.y(), 2.0);
         assert_eq!(point.x_scaled(), 100);
         assert_eq!(point.y_scaled(), 200);
+    }
+
+    #[test]
+    fn test_point_multiplier_rounding() {
+        let point = Point::<Centi>::new(2.05, 2.125);
+        assert_eq!(point.x_scaled(), 205);
+        assert_eq!(point.y_scaled(), 213);
     }
 
     #[test]
