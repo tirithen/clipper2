@@ -1,5 +1,5 @@
 use clipper2c_sys::{
-    clipper_delete_path64, clipper_paths64_area, clipper_paths64_get_point, clipper_paths64_length,
+    clipper_delete_path64, clipper_delete_paths64, clipper_paths64_area, clipper_paths64_get_point, clipper_paths64_length,
     clipper_paths64_of_paths, clipper_paths64_path_length, clipper_paths64_size, ClipperPath64,
     ClipperPaths64,
 };
@@ -258,7 +258,12 @@ impl<P: PointScaler> Paths<P> {
     /// ```
     ///
     pub fn signed_area(&self) -> f64 {
-        unsafe { clipper_paths64_area(self.to_clipperpaths64()) / (P::MULTIPLIER * P::MULTIPLIER) }
+        unsafe { 
+            let paths = self.to_clipperpaths64();
+            let area = clipper_paths64_area(paths) / (P::MULTIPLIER * P::MULTIPLIER);
+            clipper_delete_paths64(paths);
+            area
+        }
     }
 
     pub(crate) fn from_clipperpaths64(ptr: *mut ClipperPaths64) -> Self {
