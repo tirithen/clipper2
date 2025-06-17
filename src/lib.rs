@@ -71,6 +71,8 @@ mod path;
 mod paths;
 mod point;
 
+use clipper2c_sys::clipper_allocate;
+
 pub use crate::bounds::*;
 pub use crate::clipper::*;
 pub use crate::operations::*;
@@ -79,6 +81,6 @@ pub use crate::path::*;
 pub use crate::paths::*;
 pub use crate::point::*;
 
-pub(crate) unsafe fn malloc(size: usize) -> *mut std::os::raw::c_void {
-    libc::malloc(size)
+pub(crate) unsafe fn malloc(size: usize) -> *mut libc::c_void {
+    clipper_allocate(size)
 }
