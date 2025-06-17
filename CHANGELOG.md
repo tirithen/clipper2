@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.3](https://github.com/tirithen/clipper2/compare/v0.5.2...v0.5.3) (2025-06-17)
+
+
+### Features
+
+* **point:** Round `Point` integerization to be a bit more natural ([b046cad](https://github.com/tirithen/clipper2/commit/b046cadef664345cf02a287551a42930e5e5f252))
+
+
+### Bug Fixes
+
+* **paths:** memory leak in signed_area ([a4bfd3a](https://github.com/tirithen/clipper2/commit/a4bfd3ac1321a339a62f1af15713c0d519147299))
+* use c++ memory allocator to match delete calls ([3de1cc7](https://github.com/tirithen/clipper2/commit/3de1cc7de59455b3a06cc2cd6619044ddae8716a))
+
 ### [0.5.2](https://github.com/tirithen/clipper2/compare/v0.5.1...v0.5.2) (2025-03-19)
 
 
