@@ -2,6 +2,14 @@ pub struct ClipperOffset {
     ptr: *mut clipper2c_sys::ClipperClipperOffset,
 }
 
+impl Drop for ClipperOffset {
+    fn drop(&mut self) {
+        unsafe {
+            clipper2c_sys::clipper_delete_clipperoffset(self.ptr);
+        }
+    }
+}
+
 impl ClipperOffset {
     pub fn new(config: ClipperOffsetConfig) -> Self {
         let ptr = unsafe {
@@ -21,6 +29,27 @@ impl ClipperOffset {
         unsafe {
             clipper2c_sys::clipper_clipperoffset_add_path64(self.ptr, p.to_clipperpath64(), jt, et);
         }
+    }
+
+    pub fn add_paths(&self, p: Paths, jt: clipper2c_sys::ClipperJoinType, et: clipper2c_sys::ClipperEndType) {
+        unsafe {
+            clipper2c_sys::clipper_clipperoffset_add_paths64(
+                self.ptr,
+                p.to_clipperpaths64(),
+                jt,
+                et,
+            );
+        }
+    }
+
+    pub fn clear(&self) {
+        unsafe {
+            clipper2c_sys::clipper_clipperoffset_clear(self.ptr);
+        }
+    }
+
+    pub fn error_code(&self) -> i32 {
+        unsafe { clipper2c_sys::clipper_clipperoffset_error_code(self.ptr) }
     }
 
     pub fn execute(&self, delta: f64) -> crate::Paths {
