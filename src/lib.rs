@@ -70,12 +70,14 @@ mod options;
 mod path;
 mod paths;
 mod point;
+mod offset;
 
 use clipper2c_sys::clipper_allocate;
 
 pub use crate::bounds::*;
 pub use crate::clipper::*;
 pub use crate::operations::*;
+pub use crate::offset::*;
 pub use crate::options::*;
 pub use crate::path::*;
 pub use crate::paths::*;
