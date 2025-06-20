@@ -34,7 +34,7 @@ impl ClipperOffset {
     }
 }
 
-struct ClipperOffsetConfig {
+pub struct ClipperOffsetConfig {
     /// Default: 2.0,
     miter_limit: f64,
     /// Default: 0.0,
