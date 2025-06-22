@@ -31,7 +31,7 @@ impl ClipperOffset {
         }
     }
 
-    pub fn add_paths(&self, p: Paths, jt: clipper2c_sys::ClipperJoinType, et: clipper2c_sys::ClipperEndType) {
+    pub fn add_paths(&self, p: crate::Paths, jt: clipper2c_sys::ClipperJoinType, et: clipper2c_sys::ClipperEndType) {
         unsafe {
             clipper2c_sys::clipper_clipperoffset_add_paths64(
                 self.ptr,
