@@ -1,6 +1,6 @@
 [package]
 name = "clipper2"
-version = "0.5.3"
+version = "0.5.4"
 authors = ["Fredrik Söderström <tirithen@gmail.com>"]
 edition = "2021"
 license = "MIT OR Apache-2.0"
@@ -18,7 +18,7 @@ serde = ["dep:serde", "clipper2c-sys/serde"]
 
 [dependencies]
 libc = "0.2"
-clipper2c-sys = "0.1.5"
+clipper2c-sys = "0.1.6"
 thiserror = "2"
 serde = { version = "1", features = ["derive"], optional = true }
 

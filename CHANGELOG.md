@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.4](https://github.com/tirithen/clipper2/compare/v0.5.3...v0.5.4) (2026-04-13)
+
+Uses version 0.1.6 of clipper2c-sys create that contains reduced memory copy and improves performance for several operations.
+
+### [0.5.4](https://github.com/tirithen/clipper2/compare/v0.5.3...v0.5.4) (2026-04-13)
+
+Uses version 0.1.6 of clipper2c-sys create that contains reduced memory copy and improves performance for several operations.
+
 ### [0.5.3](https://github.com/tirithen/clipper2/compare/v0.5.2...v0.5.3) (2025-06-17)
 
 

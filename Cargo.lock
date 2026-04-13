@@ -67,7 +67,7 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "clipper2"
-version = "0.5.3"
+version = "0.5.4"
 dependencies = [
  "clipper2c-sys",
  "embed-doc-image",
@@ -80,9 +80,9 @@ dependencies = [
 
 [[package]]
 name = "clipper2c-sys"
-version = "0.1.5"
+version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fc0fe1f9be1018d6be0fa3c79ab338d295fb0c0c501e4fe81bfdbe3a89a23098"
+checksum = "6801d5a9a1d30e747025ec2afdc841d51665028481d61b5c719d173e88211ea3"
 dependencies = [
  "cc",
  "libc",
