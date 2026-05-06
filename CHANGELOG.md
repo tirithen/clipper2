@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+All notable changes to this project will be documented in this file. Commit messages follow the [Conventional Commits](https://www.conventionalcommits.org/) specification, which drives the version bumps and the per-release sections below.
 
 
 ### [0.6.0](https://github.com/tirithen/clipper2/compare/v0.5.4...v0.6.0) (2026-05-06)
