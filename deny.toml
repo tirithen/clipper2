@@ -28,7 +28,12 @@ unmaintained = "all"
 ignore = []
 
 [licenses]
-# Permissive licenses encountered in the Rust dependency graph.
+# Permissive licenses actually encountered in the Rust dependency
+# graph. Kept tight on purpose: cargo-deny warns on entries that
+# match nothing, which is how we notice when a future dependency
+# pulls in a license the project has not opted into. New licenses
+# get added here when, and only when, a real dep brings them in.
+#
 # The vendored Clipper2 C++ source pulled in transitively via the
 # clipper2c-sys crate is BSL-1.0 (Boost Software License 1.0) and is
 # documented in that crate's repository — cargo-deny only sees Rust
@@ -36,10 +41,7 @@ ignore = []
 allow = [
   "MIT",
   "Apache-2.0",
-  "BSD-3-Clause",
-  "ISC",
   "Unicode-3.0",
-  "Zlib",
 ]
 confidence-threshold = 0.93
 exceptions = []
