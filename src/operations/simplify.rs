@@ -1,6 +1,6 @@
 use clipper2c_sys::{clipper_delete_paths64, clipper_paths64_simplify, clipper_paths64_size};
 
-use crate::{malloc, Paths, PointScaler};
+use crate::{Paths, PointScaler, malloc};
 
 /// This function removes points that are less than the specified epsilon
 /// distance from an imaginary line that passes through its 2 adjacent points.
