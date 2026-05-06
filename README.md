@@ -3,20 +3,21 @@
 [![crate.io](https://img.shields.io/crates/v/clipper2.svg)](https://crates.io/crates/clipper2)
 [![docs.rs](https://docs.rs/clipper2/badge.svg)](https://docs.rs/clipper2)
 
-A path/polygon clipping and offsetting library for Rust.
+A safe, idiomatic Rust API for 2D polygon clipping and offsetting,
+built on top of [Clipper2](https://github.com/AngusJohnson/Clipper2),
+Angus Johnson's C++ library.
 
-The focus of this crate is to provide an easy to use API, staying as close to
-the core `Vec` and `fn` types as possible.
-
-The create uses the [clipper2c-sys](https://crates.io/crates/clipper2c-sys)
-crate that in turn is a Rust wrapper around the C++ version of
-[Clipper2](https://github.com/AngusJohnson/Clipper2).
+The focus of this crate is to provide an easy to use API, staying as
+close to the core `Vec` and `fn` types as possible. The unsafe FFI
+layer lives in the separate
+[`clipper2c-sys`](https://crates.io/crates/clipper2c-sys) crate; reach
+for that one only if you need direct access to the raw C ABI.
 
 ## Example
 
-The below example uses macroquad to visualize the result of the operations and
-some helpers from the `examples/` directory. See the examples directory for more
-examples.
+The example below uses macroquad to visualize the result of the
+operations and some helpers from the `examples/` directory. See the
+examples directory for more.
 
 ```rust
 use clipper2::*;
@@ -50,32 +51,70 @@ async fn main() -> Result<(), ClipperError> {
 }
 ```
 
-This is how the resulting shapes looks:
+This is how the resulting shapes look:
 
 ![Image displaying the result of the difference and inflate example](https://raw.githubusercontent.com/tirithen/clipper2/main/doc-assets/difference-and-inflate.png)
 
-## API uses f64, but i64 under the hood
+## What's exposed
 
-The Clipper2 library is [using `i64` values](https://www.angusj.com/clipper2/Docs/Robustness.htm)
-to guarantee the robustness of all calculations. The C++ library exposes both
-`int64_t`/`i64` and `double`/`f64` versions of several types. This crate
-therefore internally uses the `int64_t`/`i64` types only, but for now only
-exposes an `f64` API.
+- Polygon boolean operations — intersection, union, difference, XOR — through a fluent `Clipper` builder or as standalone functions
+- Polygon offsetting (inflate / deflate) with configurable corner styles (`JoinType`: square / bevel / round / miter) and endpoint styles (`EndType`: polygon / joined / butt / square / round)
+- Path simplification
+- Point-in-polygon test
+- Polygon area (signed and unsigned)
+- Geometric transforms on `Path` / `Paths` — `translate`, `rotate`, `scale` (uniform or anisotropic, optionally around a point), `flip_x` / `flip_y`
+- Path utilities — `append`, `closest_point`, `shift_start_to`, `surrounds_path`, `rectangle`, axis-aligned `Bounds`
+- Optional `serde` support for `Point`, `Path`, `Paths`
 
-The types `Point`, `Path`, and `Paths` therefore offers a `PointScaler` trait
-and generic parameter that allows the user to choose the scaling is used when
-it interally converts from `f64` to `i64`. By default it uses the `Centi` struct
-that will scale the values by `100`.
+## Typical use cases
 
-## Early days
+- **CAD / CNC / 3D-printing slicers** — toolpath offsetting, pocketing, infill generation, contour boolean operations
+- **GIS / mapping** — polygon overlay, buffer zones, vector tile clipping
+- **Vector graphics & rendering** — path stroking via offset, SVG-style clipping, tessellation pre-pass
+- **Game development** — visibility polygons, navigation mesh boolean operations, collision-region merging
+- **Robotics / motion planning** — swept-area computation, configuration-space approximations
+- **Computational geometry research** — robust boolean operations on polygons
 
-This project is in a super early stage and has for now only opened up a small
-part of what the C++ Clipper2 library has to offer. Expect breaking changes now
-and then for some more time to come as we find and explore more eregonomic ways
-of exposing the API in a Rust ideomatic way.
+## API uses `f64`, but `i64` under the hood
 
-Please also feel free to come with suggestions on how the API can be simplified
-or send code contributions directly. See
+The Clipper2 library
+[uses `i64` values](https://www.angusj.com/clipper2/Docs/Robustness.htm)
+internally to guarantee the robustness of all calculations. This crate
+takes `f64` coordinates at the API surface and rescales them to `i64`
+for the C++ engine.
+
+The types `Point`, `Path`, and `Paths` accept a `PointScaler` generic
+parameter that controls the conversion factor. By default this is the
+`Centi` scaler, which multiplies values by `100` — pick a larger
+scaler if you need sub-centi precision, or a smaller one if your input
+range is so wide that 100× would overflow.
+
+## Building
+
+The crate compiles the vendored Clipper2 C++ source through the
+`clipper2c-sys` build, and therefore requires a working **C++17**
+toolchain on the build host. CI exercises the default toolchains
+shipped with each GitHub-hosted runner:
+
+| Runner         | Default C++ toolchain          |
+|----------------|--------------------------------|
+| ubuntu-latest  | system `g++` / `clang++`       |
+| macos-latest   | Xcode-shipped `clang++`        |
+| windows-latest | MSVC (Visual Studio Build Tools) |
+
+Optional features:
+
+- `serde` — derives `Serialize` / `Deserialize` on `Point`, `Path`, and `Paths` (also enables the matching feature on `clipper2c-sys`).
+- `doc-images` — embeds illustrative images in the rustdoc output (enabled by default).
+
+WebAssembly: `wasm32-unknown-unknown` builds via the WASI SDK
+toolchain — see `scripts/wasm-check.sh`.
+
+## Status
+
+This crate is pre-1.0; expect breaking changes between minor versions
+as the API is refined. Suggestions on how the API can be simplified,
+or direct code contributions, are welcome — see
 [CONTRIBUTING.md](https://github.com/tirithen/clipper2/blob/main/CONTRIBUTING.md)
 for more details.
 
@@ -85,6 +124,7 @@ Licensed under either of [Apache License, Version 2.0](https://github.com/tirith
 or [MIT license](https://github.com/tirithen/clipper2/blob/main/LICENSE-MIT.md)
 at your option.
 
-Unless you explicitly state otherwise, any contribution intentionally submitted
-for inclusion in Serde by you, as defined in the Apache-2.0 license, shall be
-dual licensed as above, without any additional terms or conditions.
+Unless you explicitly state otherwise, any contribution intentionally
+submitted for inclusion in clipper2 by you, as defined in the
+Apache-2.0 license, shall be dual licensed as above, without any
+additional terms or conditions.
