@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+
+### [0.6.0](https://github.com/tirithen/clipper2/compare/v0.5.4...v0.6.0) (2026-05-06)
+
+### BREAKING CHANGES
+
+* bump clipper2c-sys to 0.2 and edition to 2024 ([47e9787](https://github.com/tirithen/clipper2/commit/47e97874ad1d713a995403dced556d22ae2cb7f8))
+
+### Features
+
+* expose Minkowski sum and difference ([329ea9f](https://github.com/tirithen/clipper2/commit/329ea9f2e74f91a3d44fa9e2569d5d796e10248a))
+
 ### [0.5.4](https://github.com/tirithen/clipper2/compare/v0.5.3...v0.5.4) (2026-04-13)
 
 Uses version 0.1.6 of clipper2c-sys create that contains reduced memory copy and improves performance for several operations.
