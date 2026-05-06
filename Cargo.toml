@@ -2,14 +2,15 @@
 name = "clipper2"
 version = "0.5.4"
 authors = ["Fredrik Söderström <tirithen@gmail.com>"]
-edition = "2021"
+edition = "2024"
+rust-version = "1.85"
 license = "MIT OR Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/tirithen/clipper2"
 documentation = "https://docs.rs/clipper2/"
-description = "A polygon Clipping and Offsetting library for Rust."
-keywords = ["polygon", "boolean", "clip", "clipper", "clipper2"]
-categories = ["algorithms"]
+description = "A safe, idiomatic Rust API for 2D polygon boolean clipping (intersection, union, difference, XOR), offsetting (inflate/deflate), Minkowski sum/difference, simplification, area, and point-in-polygon, on top of Clipper2."
+keywords = ["polygon", "clipping", "offset", "minkowski", "clipper2"]
+categories = ["algorithms", "graphics", "science::geo"]
 
 [features]
 default = ["doc-images"]
@@ -18,7 +19,7 @@ serde = ["dep:serde", "clipper2c-sys/serde"]
 
 [dependencies]
 libc = "0.2"
-clipper2c-sys = "0.1.6"
+clipper2c-sys = "0.2"
 thiserror = "2"
 serde = { version = "1", features = ["derive"], optional = true }
 

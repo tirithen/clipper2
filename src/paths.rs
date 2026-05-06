@@ -283,19 +283,21 @@ impl<P: PointScaler> Paths<P> {
     }
 
     pub(crate) unsafe fn to_clipperpaths64(&self) -> *mut ClipperPaths64 {
-        let mem = malloc(clipper_paths64_size());
-        let mut paths = self
-            .iter()
-            .map(|p| p.to_clipperpath64())
-            .collect::<Vec<*mut ClipperPath64>>();
+        unsafe {
+            let mem = malloc(clipper_paths64_size());
+            let mut paths = self
+                .iter()
+                .map(|p| p.to_clipperpath64())
+                .collect::<Vec<*mut ClipperPath64>>();
 
-        let result = clipper_paths64_of_paths(mem, paths.as_mut_ptr(), self.len());
+            let result = clipper_paths64_of_paths(mem, paths.as_mut_ptr(), self.len());
 
-        for path in paths {
-            clipper_delete_path64(path);
+            for path in paths {
+                clipper_delete_path64(path);
+            }
+
+            result
         }
-
-        result
     }
 }
 

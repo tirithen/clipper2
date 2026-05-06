@@ -394,20 +394,22 @@ impl<P: PointScaler> Path<P> {
     }
 
     pub(crate) unsafe fn to_clipperpath64(&self) -> *mut ClipperPath64 {
-        let mem = malloc(clipper_path64_size());
-        clipper_path64_of_points(
-            mem,
-            self.0
-                .iter()
-                .cloned()
-                .map(|point: Point<P>| ClipperPoint64 {
-                    x: point.x_scaled(),
-                    y: point.y_scaled(),
-                })
-                .collect::<Vec<_>>()
-                .as_mut_ptr(),
-            self.len(),
-        )
+        unsafe {
+            let mem = malloc(clipper_path64_size());
+            clipper_path64_of_points(
+                mem,
+                self.0
+                    .iter()
+                    .cloned()
+                    .map(|point: Point<P>| ClipperPoint64 {
+                        x: point.x_scaled(),
+                        y: point.y_scaled(),
+                    })
+                    .collect::<Vec<_>>()
+                    .as_mut_ptr(),
+                self.len(),
+            )
+        }
     }
 }
 
