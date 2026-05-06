@@ -82,5 +82,5 @@ pub use crate::paths::*;
 pub use crate::point::*;
 
 pub(crate) unsafe fn malloc(size: usize) -> *mut libc::c_void {
-    clipper_allocate(size)
+    unsafe { clipper_allocate(size) }
 }
