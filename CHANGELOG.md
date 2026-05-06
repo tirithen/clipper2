@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### BREAKING CHANGES
 
-* bump clipper2c-sys to 0.2 and edition to 2024 ([47e9787](https://github.com/tirithen/clipper2/commit/47e97874ad1d713a995403dced556d22ae2cb7f8))
+* bump clipper2c-sys to 0.2 (updates C++ Clipper2 lib to 2.0.1) and edition to 2024 ([47e9787](https://github.com/tirithen/clipper2/commit/47e97874ad1d713a995403dced556d22ae2cb7f8))
 
 ### Features
 
