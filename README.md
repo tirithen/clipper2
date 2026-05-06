@@ -55,10 +55,51 @@ This is how the resulting shapes look:
 
 ![Image displaying the result of the difference and inflate example](https://raw.githubusercontent.com/tirithen/clipper2/main/doc-assets/difference-and-inflate.png)
 
+## Minkowski sum and difference
+
+The Minkowski operations grow a polygon by an arbitrary polygonal
+kernel rather than the radius-only kernel of `inflate`, which makes
+them the right primitive for square cutters, drag-knives, asymmetric
+tool footprints, and configuration-space obstacles in robot motion
+planning. The kernel may be concave; concave kernels can carve holes
+into the swept region.
+
+`minkowski_sum` translates the kernel by `+p` at every vertex of the
+input path; `minkowski_diff` translates by `-p`. For a pattern that
+is symmetric about the origin (a centred disc or square) the two
+agree, but for an asymmetric pattern the difference is the sum
+reflected through the origin of the pattern. The screenshots below
+use the same concave arrowhead kernel against the same L-shaped
+outline:
+
+```rust
+use clipper2::*;
+
+// A concave arrowhead pointing right (asymmetric, non-convex).
+let pattern: Path = vec![
+    (0.6, 0.0), (-0.5, 0.5), (-0.1, 0.0), (-0.5, -0.5),
+].into();
+
+// A closed L-shaped contour.
+let outline: Path = vec![
+    (1.0, 1.0), (5.0, 1.0), (5.0, 2.0),
+    (2.5, 2.0), (2.5, 3.5), (1.0, 3.5),
+].into();
+
+let sum  = outline.minkowski_sum (pattern.clone(), true);
+let diff = outline.minkowski_diff(pattern,         true);
+```
+
+| `minkowski_sum` | `minkowski_diff` |
+|---|---|
+| ![Result of the Minkowski sum example](https://raw.githubusercontent.com/tirithen/clipper2/main/doc-assets/minkowski-sum.png) | ![Result of the Minkowski difference example](https://raw.githubusercontent.com/tirithen/clipper2/main/doc-assets/minkowski-diff.png) |
+| The arrowhead extends the swept boundary **rightward** (its tip is at `+0.6` x); the concave notch carves an inner ring on the **right** half of the L. | The same arrowhead, applied via difference, extends the swept boundary **leftward**; the concave notch now carves the inner ring on the **left** half of the L. |
+
 ## What's exposed
 
 - Polygon boolean operations — intersection, union, difference, XOR — through a fluent `Clipper` builder or as standalone functions
 - Polygon offsetting (inflate / deflate) with configurable corner styles (`JoinType`: square / bevel / round / miter) and endpoint styles (`EndType`: polygon / joined / butt / square / round)
+- Minkowski sum and difference for sweeping an arbitrary polygonal kernel along a path or polygon (square / drag-knife / asymmetric tool footprints, configuration-space obstacles)
 - Path simplification
 - Point-in-polygon test
 - Polygon area (signed and unsigned)

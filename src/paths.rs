@@ -1,12 +1,12 @@
 use clipper2c_sys::{
-    clipper_delete_path64, clipper_delete_paths64, clipper_paths64_area, clipper_paths64_get_point,
-    clipper_paths64_length, clipper_paths64_of_paths, clipper_paths64_path_length,
-    clipper_paths64_size, ClipperPath64, ClipperPaths64,
+    ClipperPath64, ClipperPaths64, clipper_delete_path64, clipper_delete_paths64,
+    clipper_paths64_area, clipper_paths64_get_point, clipper_paths64_length,
+    clipper_paths64_of_paths, clipper_paths64_path_length, clipper_paths64_size,
 };
 
 use crate::{
-    inflate, malloc, simplify, Bounds, Centi, Clipper, EndType, JoinType, Path, Point, PointScaler,
-    WithSubjects,
+    Bounds, Centi, Clipper, EndType, JoinType, Path, Point, PointScaler, WithSubjects, inflate,
+    malloc, minkowski_diff, minkowski_sum, simplify,
 };
 
 /// A collection of paths.
@@ -198,6 +198,80 @@ impl<P: PointScaler> Paths<P> {
     /// For more details see the original [simplify](https://www.angusj.com/clipper2/Docs/Units/Clipper/Functions/SimplifyPaths.htm) docs.
     pub fn simplify(&self, epsilon: f64, is_open: bool) -> Self {
         simplify(self.clone(), epsilon, is_open)
+    }
+
+    /// Sweep `pattern` along every path in this set and return the
+    /// union of the per-path results.
+    ///
+    /// This grows every path by an arbitrary polygonal kernel rather
+    /// than the radius-only kernel that [`Paths::inflate`] offers —
+    /// for example a square cutter, a drag-knife, or any other tool
+    /// footprint that is not disc-shaped. The kernel may be concave;
+    /// in that case the swept region can include holes.
+    ///
+    /// Pass `is_closed = true` when the paths are closed polygons
+    /// and `false` for open polylines. The pattern is applied at
+    /// every vertex of every input path, so dense polylines produce
+    /// denser results than polygons with the same outer shape. The
+    /// internal per-path union uses [`FillRule::NonZero`](crate::FillRule).
+    ///
+    /// See the free function [`minkowski_sum`] for an illustrated
+    /// example.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use clipper2::*;
+    ///
+    /// let pattern: Path = vec![
+    ///     (0.6, 0.0), (-0.5, 0.5), (-0.1, 0.0), (-0.5, -0.5),
+    /// ].into();
+    /// let paths: Paths = vec![
+    ///     vec![(1.0, 1.0), (5.0, 1.0), (5.0, 2.0),
+    ///          (2.5, 2.0), (2.5, 3.5), (1.0, 3.5)],
+    ///     vec![(8.0, 0.0), (12.0, 0.0), (12.0, 4.0)],
+    /// ].into();
+    /// let swept = paths.minkowski_sum(pattern, true);
+    /// ```
+    ///
+    /// For more details see the original [Minkowski sum](https://www.angusj.com/clipper2/Docs/Units/Clipper/Functions/MinkowskiSum.htm) docs.
+    pub fn minkowski_sum(&self, pattern: impl Into<Path<P>>, is_closed: bool) -> Self {
+        minkowski_sum(pattern, self.clone(), is_closed)
+    }
+
+    /// Sweep `pattern` along every path in this set translating by
+    /// `-p` instead of `+p` at every vertex.
+    ///
+    /// For a pattern that is symmetric about the origin this returns
+    /// the same shape as [`Paths::minkowski_sum`]. For asymmetric
+    /// patterns this is the operation behind "set of points `x` such
+    /// that `x + pattern` is contained in the input paths" — robot
+    /// footprint configuration spaces, tool reachability inside a
+    /// pocket, swept volumes for a cutter approaching from a fixed
+    /// direction.
+    ///
+    /// See [`Paths::minkowski_sum`] for the meaning of `is_closed`
+    /// and the shape of the returned paths, and the free function
+    /// [`minkowski_diff`] for an illustrated example.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use clipper2::*;
+    ///
+    /// let pattern: Path = vec![
+    ///     (0.6, 0.0), (-0.5, 0.5), (-0.1, 0.0), (-0.5, -0.5),
+    /// ].into();
+    /// let paths: Paths = vec![
+    ///     vec![(1.0, 1.0), (5.0, 1.0), (5.0, 2.0),
+    ///          (2.5, 2.0), (2.5, 3.5), (1.0, 3.5)],
+    /// ].into();
+    /// let swept = paths.minkowski_diff(pattern, true);
+    /// ```
+    ///
+    /// For more details see the original [Minkowski difference](https://www.angusj.com/clipper2/Docs/Units/Clipper/Functions/MinkowskiDiff.htm) docs.
+    pub fn minkowski_diff(&self, pattern: impl Into<Path<P>>, is_closed: bool) -> Self {
+        minkowski_diff(pattern, self.clone(), is_closed)
     }
 
     /// Create a [`Clipper`] builder with this set of paths as the subject that

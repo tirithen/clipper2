@@ -1,10 +1,10 @@
 #![warn(missing_docs)]
 
 //! clipper2 is a path/polygon clipping and offsetting library that supports
-//! operations like difference, inflate, intersect, point-in-polygon, union,
-//! xor, simplify.
+//! operations like difference, inflate, intersect, Minkowski sum/difference,
+//! point-in-polygon, union, xor, and simplify.
 //!
-//! The create uses the [clipper2c-sys](https://crates.io/crates/clipper2c-sys)
+//! The crate uses the [clipper2c-sys](https://crates.io/crates/clipper2c-sys)
 //! crate that in turn is a Rust wrapper around the C++ version of
 //! [Clipper2](https://github.com/AngusJohnson/Clipper2).
 //!
@@ -14,9 +14,11 @@
 //! 1. Through the [`Path`]/[`Paths`] struct methods:
 //!     * [`Path::inflate`]
 //!     * [`Path::simplify`]
+//!     * [`Path::minkowski_sum`] / [`Path::minkowski_diff`]
 //!     * [`Path::is_point_inside`]
 //!     * [`Paths::inflate`]
 //!     * [`Paths::simplify`]
+//!     * [`Paths::minkowski_sum`] / [`Paths::minkowski_diff`]
 //!     * [`Paths::to_clipper_subject`] returns a [`Clipper`] builder struct
 //!       with the current set of paths as the first subject, and allowing to
 //!       make boolean operations on several sets of paths in one go.
@@ -26,6 +28,7 @@
 //!     * [`difference`]
 //!     * [`inflate`]
 //!     * [`intersect`]
+//!     * [`minkowski_sum`] / [`minkowski_diff`]
 //!     * [`point_in_polygon`]
 //!     * [`simplify`]
 //!     * [`union`]

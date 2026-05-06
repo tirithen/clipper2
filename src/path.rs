@@ -1,12 +1,12 @@
 use clipper2c_sys::{
-    clipper_delete_path64, clipper_path64_area, clipper_path64_get_point, clipper_path64_length,
-    clipper_path64_of_points, clipper_path64_simplify, clipper_path64_size, ClipperPath64,
-    ClipperPoint64,
+    ClipperPath64, ClipperPoint64, clipper_delete_path64, clipper_path64_area,
+    clipper_path64_get_point, clipper_path64_length, clipper_path64_of_points,
+    clipper_path64_simplify, clipper_path64_size,
 };
 
 use crate::{
-    inflate, malloc, point_in_polygon, Bounds, Centi, EndType, JoinType, Paths, Point,
-    PointInPolygonResult, PointScaler,
+    Bounds, Centi, EndType, JoinType, Paths, Point, PointInPolygonResult, PointScaler, inflate,
+    malloc, minkowski_diff, minkowski_sum, point_in_polygon,
 };
 
 /// A collection of points.
@@ -259,6 +259,80 @@ impl<P: PointScaler> Path<P> {
             clipper_delete_path64(result_ptr);
             result
         }
+    }
+
+    /// Sweep `pattern` along this path and return the union of all
+    /// translated copies of `pattern` placed at every vertex.
+    ///
+    /// This grows the path by an arbitrary polygonal kernel rather
+    /// than the radius-only kernel that [`Path::inflate`] offers —
+    /// for example a square cutter, a drag-knife, or any other tool
+    /// footprint that is not disc-shaped. The kernel may be concave;
+    /// in that case the swept region can include holes, which is why
+    /// this method returns [`Paths<P>`](struct.Paths.html) rather
+    /// than `Path<P>`.
+    ///
+    /// Pass `is_closed = true` when this path is a closed polygon
+    /// and `false` for an open polyline. The pattern is applied at
+    /// every vertex, so a dense polyline produces a denser result
+    /// than a polygon with the same outer shape.
+    ///
+    /// See the free function [`minkowski_sum`] for an illustrated
+    /// example.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use clipper2::*;
+    ///
+    /// let outline: Path = vec![
+    ///     (1.0, 1.0), (5.0, 1.0), (5.0, 2.0),
+    ///     (2.5, 2.0), (2.5, 3.5), (1.0, 3.5),
+    /// ].into();
+    /// let pattern: Path = vec![
+    ///     (0.6, 0.0), (-0.5, 0.5), (-0.1, 0.0), (-0.5, -0.5),
+    /// ].into();
+    /// let swept = outline.minkowski_sum(pattern, true);
+    /// ```
+    ///
+    /// For more details see the original [Minkowski sum](https://www.angusj.com/clipper2/Docs/Units/Clipper/Functions/MinkowskiSum.htm) docs.
+    pub fn minkowski_sum(&self, pattern: impl Into<Path<P>>, is_closed: bool) -> Paths<P> {
+        minkowski_sum(pattern, self.clone(), is_closed)
+    }
+
+    /// Sweep `pattern` along this path translating by `-p` instead
+    /// of `+p` at every vertex.
+    ///
+    /// For a pattern that is symmetric about the origin this returns
+    /// the same shape as [`Path::minkowski_sum`]. For asymmetric
+    /// patterns this is the operation behind "set of points `x` such
+    /// that `x + pattern` is contained in this path" — robot
+    /// footprint configuration spaces, tool reachability inside a
+    /// pocket, swept volumes for a cutter approaching from a fixed
+    /// direction.
+    ///
+    /// See [`Path::minkowski_sum`] for the meaning of `is_closed`
+    /// and the shape of the returned paths, and the free function
+    /// [`minkowski_diff`] for an illustrated example.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use clipper2::*;
+    ///
+    /// let outline: Path = vec![
+    ///     (1.0, 1.0), (5.0, 1.0), (5.0, 2.0),
+    ///     (2.5, 2.0), (2.5, 3.5), (1.0, 3.5),
+    /// ].into();
+    /// let pattern: Path = vec![
+    ///     (0.6, 0.0), (-0.5, 0.5), (-0.1, 0.0), (-0.5, -0.5),
+    /// ].into();
+    /// let swept = outline.minkowski_diff(pattern, true);
+    /// ```
+    ///
+    /// For more details see the original [Minkowski difference](https://www.angusj.com/clipper2/Docs/Units/Clipper/Functions/MinkowskiDiff.htm) docs.
+    pub fn minkowski_diff(&self, pattern: impl Into<Path<P>>, is_closed: bool) -> Paths<P> {
+        minkowski_diff(pattern, self.clone(), is_closed)
     }
 
     /// The function result indicates whether the point is inside, or outside,
