@@ -1,0 +1,67 @@
+# git-cliff configuration
+# https://git-cliff.org/docs/configuration
+
+[changelog]
+header = """
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+"""
+body = """
+{%- if version %}
+### [{{ version | trim_start_matches(pat="v") }}]\
+(https://github.com/tirithen/clipper2/compare/{{ previous.version }}...{{ version }}) \
+({{ timestamp | date(format="%Y-%m-%d") }})
+{%- else %}
+### Unreleased
+{%- endif %}
+{% for group, commits in commits | group_by(attribute="group") %}
+### {{ group }}
+
+{% for commit in commits -%}
+* {{ commit.message }} \
+([{{ commit.id | truncate(length=7, end="") }}]\
+(https://github.com/tirithen/clipper2/commit/{{ commit.id }}))
+{% endfor %}
+{%- endfor %}
+"""
+footer = ""
+trim = true
+
+[git]
+conventional_commits = true
+filter_unconventional = true
+filter_commits = false
+tag_pattern = "v[0-9].*"
+sort_commits = "oldest"
+commit_parsers = [
+  # The BREAKING-CHANGE footer rule deliberately precedes the message
+  # rules: a commit can only land in one group, and a release-defining
+  # breaking change deserves its own section regardless of whether the
+  # subject prefix is feat / fix / refactor / etc.
+  { footer = "(?i)^breaking[ -]change", group = "BREAKING CHANGES" },
+  { message = "^feat", group = "Features" },
+  { message = "^fix", group = "Bug Fixes" },
+  { message = "^perf", group = "Performance Improvements" },
+  { message = "^revert", group = "Reverts" },
+  { message = "^doc", skip = true },
+  { message = "^style", skip = true },
+  { message = "^refactor", skip = true },
+  { message = "^test", skip = true },
+  { message = "^chore", skip = true },
+  { message = "^ci", skip = true },
+  { message = "^build", skip = true },
+]
+
+[remote.github]
+owner = "tirithen"
+repo = "clipper2"
+
+[bump]
+# Honour pre-1.0 SemVer (the Rust / Cargo convention): for 0.x.y the
+# 'x' position is the breaking axis, so a BREAKING CHANGE bumps the
+# minor (0.5.4 -> 0.6.0), not the major. A 'feat' on 0.x is treated
+# as a non-breaking addition and bumps the patch.
+breaking_always_bump_major = false
+features_always_bump_minor = false

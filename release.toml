@@ -1,0 +1,6 @@
+# cargo-release configuration
+# https://github.com/crate-ci/cargo-release
+
+pre-release-hook = ["scripts/changelog-update.sh", "v{{version}}"]
+pre-release-commit-message = "chore(release): {{version}}"
+publish = true
