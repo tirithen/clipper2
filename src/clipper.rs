@@ -1,12 +1,12 @@
 use std::marker::PhantomData;
 
 use clipper2c_sys::{
-    clipper_clipper64, clipper_clipper64_add_clip, clipper_clipper64_add_open_subject,
-    clipper_clipper64_add_subject, clipper_clipper64_execute, clipper_clipper64_size,
-    clipper_delete_clipper64, clipper_delete_paths64, ClipperClipper64,
+    ClipperClipper64, clipper_clipper64, clipper_clipper64_add_clip,
+    clipper_clipper64_add_open_subject, clipper_clipper64_add_subject, clipper_clipper64_execute,
+    clipper_clipper64_size, clipper_delete_clipper64, clipper_delete_paths64,
 };
 
-use crate::{malloc, Centi, ClipType, FillRule, Paths, PointScaler};
+use crate::{Centi, ClipType, FillRule, Paths, PointScaler, malloc};
 
 /// The state of the Clipper struct.
 pub trait ClipperState {}

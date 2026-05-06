@@ -1,6 +1,6 @@
 use clipper2c_sys::{clipper_delete_paths64, clipper_paths64_inflate, clipper_paths64_size};
 
-use crate::{malloc, EndType, JoinType, Paths, PointScaler};
+use crate::{EndType, JoinType, Paths, PointScaler, malloc};
 
 /// This function performs both closed path and open path offsetting.
 ///
