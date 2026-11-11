@@ -8,6 +8,29 @@ use clipper2c_sys::ClipperPoint64;
 /// The default multiplier is `Centi`, and others are provided by the library,
 /// but if needed the user can create a custom scaler struct that implements
 /// `PointScaler`.
+///
+/// # Choosing a scaler
+///
+/// A point is stored as `round(value * MULTIPLIER)` in an `i64`, so the
+/// multiplier sets both the resolution and the range. Clipper2 requires
+/// scaled coordinates to stay within `+-(i64::MAX >> 2)` (about `2.3e18`) for
+/// its intersection arithmetic to be exact, so the usable range is that limit
+/// divided by the multiplier. The table gives the resolution in input units
+/// and the largest coordinate magnitude that fits, both for Clipper2's limit
+/// and for the plain `i64` limit.
+///
+/// | Scaler  | Multiplier | Resolution | Range (Clipper2 limit) | Range (`i64`) |
+/// |---------|-----------:|-----------:|-----------------------:|--------------:|
+/// | `One`   | 1          | 1          | +-2.3e18               | +-9.2e18      |
+/// | `Deci`  | 1e1        | 0.1        | +-2.3e17               | +-9.2e17      |
+/// | `Centi` | 1e2        | 0.01       | +-2.3e16               | +-9.2e16      |
+/// | `Milli` | 1e3        | 0.001      | +-2.3e15               | +-9.2e15      |
+/// | `Micro` | 1e6        | 0.000001   | +-2.3e12               | +-9.2e12      |
+/// | `Nano`  | 1e9        | 0.000000001| +-2.3e9                | +-9.2e9       |
+///
+/// With millimetres as the input unit, `Milli` resolves micrometres, `Micro`
+/// resolves nanometres and `Nano` resolves picometres, the latter covering
+/// coordinates up to about 2300 km.
 pub trait PointScaler: Default + Clone + Copy + PartialEq + std::hash::Hash {
     /// The point multiplier. This is set to a custom value when implementing
     /// the `PointScaler` trait.
@@ -56,6 +79,22 @@ impl PointScaler for Milli {
     const MULTIPLIER: f64 = 1000.0;
 }
 
+/// Scale by 1,000,000.
+#[derive(Debug, Default, Copy, Clone, PartialEq, Hash)]
+pub struct Micro;
+
+impl PointScaler for Micro {
+    const MULTIPLIER: f64 = 1_000_000.0;
+}
+
+/// Scale by 1,000,000,000.
+#[derive(Debug, Default, Copy, Clone, PartialEq, Hash)]
+pub struct Nano;
+
+impl PointScaler for Nano {
+    const MULTIPLIER: f64 = 1_000_000_000.0;
+}
+
 /// XY Point with custom scaler.
 ///
 /// For
@@ -63,8 +102,8 @@ impl PointScaler for Milli {
 /// clipper2 uses 64bit integers to store coordinates.
 ///
 /// Therefore you can choose a implementation of PointScaler for your
-/// use-case. This library offers `One`, `Deci`, `Centi` and `Milli` multipliers
-/// where `Centi` is the default (multiplies values by 100 when converting to
+/// use-case. This library offers `One`, `Deci`, `Centi`, `Milli`, `Micro` and `Nano`
+/// multipliers (see [`PointScaler`] for a table of resolution and range) where `Centi` is the default (multiplies values by 100 when converting to
 /// i64).
 ///
 /// # Examples
@@ -83,6 +122,14 @@ impl PointScaler for Milli {
 /// assert_eq!(point.y(), 2.0);
 /// assert_eq!(point.x_scaled(), 1000);
 /// assert_eq!(point.y_scaled(), 2000);
+///
+/// let point = Point::<Micro>::new(1.0, 2.0);
+/// assert_eq!(point.x_scaled(), 1_000_000);
+/// assert_eq!(point.y_scaled(), 2_000_000);
+///
+/// let point = Point::<Nano>::new(1.0, 2.0);
+/// assert_eq!(point.x_scaled(), 1_000_000_000);
+/// assert_eq!(point.y_scaled(), 2_000_000_000);
 /// ```
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(
@@ -237,6 +284,50 @@ mod test {
         let point = Point::<Centi>::new(2.05, 2.125);
         assert_eq!(point.x_scaled(), 205);
         assert_eq!(point.y_scaled(), 213);
+    }
+
+    #[test]
+    fn test_point_micro_and_nano() {
+        let point = Point::<Micro>::new(1.5, -2.000_000_4);
+        assert_eq!(point.x_scaled(), 1_500_000);
+        assert_eq!(point.y_scaled(), -2_000_000);
+        assert_eq!(point.x(), 1.5);
+
+        let point = Point::<Nano>::new(1.5, -2.000_000_000_4);
+        assert_eq!(point.x_scaled(), 1_500_000_000);
+        assert_eq!(point.y_scaled(), -2_000_000_000);
+        assert_eq!(point.x(), 1.5);
+    }
+
+    #[test]
+    fn test_scaler_multipliers() {
+        assert_eq!(One::MULTIPLIER, 1.0);
+        assert_eq!(Deci::MULTIPLIER, 10.0);
+        assert_eq!(Centi::MULTIPLIER, 100.0);
+        assert_eq!(Milli::MULTIPLIER, 1e3);
+        assert_eq!(Micro::MULTIPLIER, 1e6);
+        assert_eq!(Nano::MULTIPLIER, 1e9);
+    }
+
+    #[test]
+    fn test_nano_boolean_operation_resolves_small_features() {
+        let a: crate::Paths<Nano> = vec![
+            (0.0, 0.0),
+            (0.000_003, 0.0),
+            (0.000_003, 0.000_003),
+            (0.0, 0.000_003),
+        ]
+        .into();
+        let b: crate::Paths<Nano> = vec![
+            (0.000_001, 0.0),
+            (0.000_005, 0.0),
+            (0.000_005, 0.000_003),
+            (0.000_001, 0.000_003),
+        ]
+        .into();
+        let result = crate::union(a, b, crate::FillRule::NonZero).unwrap();
+        assert_eq!(result.len(), 1);
+        assert!((result.signed_area() - 15e-12).abs() < 1e-15);
     }
 
     #[test]
