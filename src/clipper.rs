@@ -107,6 +107,38 @@ impl<P: PointScaler> Clipper<NoSubjects, P> {
 }
 
 impl<P: PointScaler> Clipper<WithSubjects, P> {
+    /// Applies a union boolean operation to the subjects alone, without any
+    /// clip paths.
+    ///
+    /// This resolves overlapping and self-intersecting subject paths under the
+    /// given fill rule. For example, rings that are filled according to
+    /// [`FillRule::NonZero`] come out as outer paths and holes, and
+    /// [`FillRule::EvenOdd`] turns nested rings into holes.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use clipper2::*;
+    ///
+    /// let outer: Paths = vec![(0.0, 0.0), (10.0, 0.0), (10.0, 10.0), (0.0, 10.0)].into();
+    /// let inner: Paths = vec![(2.0, 2.0), (8.0, 2.0), (8.0, 8.0), (2.0, 8.0)].into();
+    ///
+    /// let result = Clipper::new()
+    ///     .add_subject(outer)
+    ///     .add_subject(inner)
+    ///     .union(FillRule::EvenOdd)
+    ///     .expect("Failed union operation");
+    ///
+    /// // The inner ring is a hole.
+    /// assert_eq!(result.len(), 2);
+    /// assert_eq!(result.signed_area(), 64.0);
+    /// ```
+    ///
+    /// For more details see the original [union](https://www.angusj.com/clipper2/Docs/Units/Clipper/Functions/Union.htm) docs.
+    pub fn union(self, fill_rule: FillRule) -> Result<Paths<P>, ClipperError> {
+        self.boolean_operation(ClipType::Union, fill_rule)
+    }
+
     /// Adds another subject path to the Clipper instance.
     ///
     /// # Examples
@@ -274,7 +306,9 @@ impl<P: PointScaler> Clipper<WithClips, P> {
     pub fn xor(self, fill_rule: FillRule) -> Result<Paths<P>, ClipperError> {
         self.boolean_operation(ClipType::Xor, fill_rule)
     }
+}
 
+impl<S: ClipperState, P: PointScaler> Clipper<S, P> {
     fn boolean_operation(
         self,
         clip_type: ClipType,

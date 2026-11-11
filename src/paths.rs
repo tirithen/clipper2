@@ -5,8 +5,8 @@ use clipper2c_sys::{
 };
 
 use crate::{
-    Bounds, Centi, Clipper, EndType, JoinType, Path, Point, PointScaler, WithSubjects, inflate,
-    malloc, minkowski_diff, minkowski_sum, simplify,
+    Bounds, Centi, Clipper, ClipperError, EndType, FillRule, JoinType, Path, Point, PointScaler,
+    WithSubjects, inflate, malloc, minkowski_diff, minkowski_sum, simplify,
 };
 
 /// A collection of paths.
@@ -308,6 +308,34 @@ impl<P: PointScaler> Paths<P> {
         clipper.add_open_subject(self.clone())
     }
 
+    /// Resolve overlaps and self-intersections in this set of paths by taking
+    /// the union of the paths alone under the given fill rule.
+    ///
+    /// This is the same as
+    /// `paths.to_clipper_subject().union(fill_rule)`, without needing a clip
+    /// set.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use clipper2::*;
+    ///
+    /// let paths: Paths = vec![
+    ///     vec![(0.0, 0.0), (10.0, 0.0), (10.0, 10.0), (0.0, 10.0)],
+    ///     vec![(5.0, 5.0), (15.0, 5.0), (15.0, 15.0), (5.0, 15.0)],
+    /// ]
+    /// .into();
+    ///
+    /// let merged = paths.union(FillRule::NonZero).expect("Failed union operation");
+    /// assert_eq!(merged.len(), 1);
+    /// assert_eq!(merged.signed_area(), 175.0);
+    /// ```
+    ///
+    /// For more details see the original [union](https://www.angusj.com/clipper2/Docs/Units/Clipper/Functions/Union.htm) docs.
+    pub fn union(&self, fill_rule: FillRule) -> Result<Self, ClipperError> {
+        self.to_clipper_subject().union(fill_rule)
+    }
+
     /// This function returns the area of the supplied paths. It's assumed
     /// that the paths are closed and do not self-intersect.
     ///
@@ -476,6 +504,56 @@ mod test {
     use crate::Deci;
 
     use super::*;
+
+    fn square(x: f64, y: f64, size: f64) -> Vec<(f64, f64)> {
+        vec![(x, y), (x + size, y), (x + size, y + size), (x, y + size)]
+    }
+
+    #[test]
+    fn test_union_of_subjects_alone_merges_overlap() {
+        let paths: Paths = vec![square(0.0, 0.0, 10.0), square(5.0, 5.0, 10.0)].into();
+        let merged = paths.union(FillRule::NonZero).unwrap();
+        assert_eq!(merged.len(), 1);
+        assert_eq!(merged.signed_area(), 175.0);
+    }
+
+    #[test]
+    fn test_union_of_subjects_alone_even_odd_makes_hole() {
+        let paths: Paths = vec![square(0.0, 0.0, 10.0), square(2.0, 2.0, 6.0)].into();
+        let even_odd = paths.union(FillRule::EvenOdd).unwrap();
+        assert_eq!(even_odd.len(), 2);
+        assert_eq!(even_odd.signed_area(), 64.0);
+
+        let non_zero = paths.union(FillRule::NonZero).unwrap();
+        assert_eq!(non_zero.len(), 1);
+        assert_eq!(non_zero.signed_area(), 100.0);
+    }
+
+    #[test]
+    fn test_union_of_subjects_alone_resolves_self_intersection() {
+        let bowtie: Paths = vec![vec![(0.0, 0.0), (10.0, 10.0), (10.0, 0.0), (0.0, 10.0)]].into();
+        let resolved = bowtie.union(FillRule::NonZero).unwrap();
+        assert_eq!(resolved.len(), 2);
+        assert_eq!(resolved.signed_area(), 50.0);
+    }
+
+    #[test]
+    fn test_union_of_subjects_alone_matches_empty_clip() {
+        let paths: Paths = vec![square(0.0, 0.0, 10.0), square(5.0, 5.0, 10.0)].into();
+        let alone = paths.union(FillRule::NonZero).unwrap();
+        let with_clip = paths
+            .to_clipper_subject()
+            .add_clip(Paths::new(Vec::new()))
+            .union(FillRule::NonZero)
+            .unwrap();
+        assert_eq!(alone, with_clip);
+    }
+
+    #[test]
+    fn test_union_of_empty_paths_is_empty() {
+        let result = Paths::<Centi>::default().union(FillRule::NonZero).unwrap();
+        assert!(result.is_empty());
+    }
 
     #[test]
     fn test_default() {

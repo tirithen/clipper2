@@ -18,6 +18,7 @@
 //!     * [`Path::is_point_inside`]
 //!     * [`Paths::inflate`]
 //!     * [`Paths::simplify`]
+//!     * [`Paths::union`] resolves overlaps within one set of paths
 //!     * [`Paths::minkowski_sum`] / [`Paths::minkowski_diff`]
 //!     * [`Paths::to_clipper_subject`] returns a [`Clipper`] builder struct
 //!       with the current set of paths as the first subject, and allowing to
