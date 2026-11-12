@@ -8,7 +8,7 @@ set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 
 version="${1:?usage: changelog-update.sh <version-tag, e.g. v0.6.0>}"
-new_entry=$(git cliff --tag "$version" --unreleased --strip header)
+new_entry=$(git cliff --tag "$version" --unreleased --strip header | sed '/./,$!d')
 
 if [[ "${DRY_RUN:-true}" == "true" ]]; then
     cat <<EOF
@@ -30,8 +30,8 @@ if [[ -z "$first_entry_line" ]]; then
     cat CHANGELOG.md > "$tmpfile"
     printf '%s\n' "$new_entry" >> "$tmpfile"
 else
-    head -n $((first_entry_line - 1)) CHANGELOG.md > "$tmpfile"
-    printf '%s\n\n' "$new_entry" >> "$tmpfile"
+    header=$(head -n $((first_entry_line - 1)) CHANGELOG.md)
+    printf '%s\n\n%s\n\n' "$header" "$new_entry" > "$tmpfile"
     tail -n +"$first_entry_line" CHANGELOG.md >> "$tmpfile"
 fi
 
