@@ -15,6 +15,12 @@ use crate::{EndType, JoinType, Paths, PointScaler, malloc};
 /// close extra points and it is therefore recommented to almost always call
 /// [`simplify`](./fn.simplify.html) on the path after inflating/shrinking it.
 ///
+/// `miter_limit` is scaled with the points like a distance, although
+/// Clipper2 reads it as a ratio of the miter length to `delta`: with a
+/// scaler other than [`One`](crate::One) the limit is in effect much larger than
+/// given. [`inflate_with_arc_tolerance`](./fn.inflate_with_arc_tolerance.html)
+/// passes it as the ratio it is.
+///
 /// # Example
 ///
 /// ```rust

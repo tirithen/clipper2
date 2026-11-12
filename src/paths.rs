@@ -294,6 +294,9 @@ impl<P: PointScaler> Paths<P> {
     /// Create a [`Clipper`] builder with this set of paths as the open subject
     /// that will allow for making boolean operations on this set of paths.
     ///
+    /// The boolean operations return the closed paths of the result only:
+    /// what is left of open subjects is not returned.
+    ///
     /// # Examples
     ///
     /// ```rust

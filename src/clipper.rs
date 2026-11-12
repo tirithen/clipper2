@@ -105,6 +105,9 @@ impl<P: PointScaler> Clipper<NoSubjects, P> {
 
     /// Adds an open subject path to the Clipper instance.
     ///
+    /// The boolean operations return the closed paths of the result only:
+    /// what is left of open subjects is not returned.
+    ///
     /// # Examples
     ///
     /// ```rust
@@ -186,6 +189,9 @@ impl<P: PointScaler> Clipper<WithSubjects, P> {
     }
 
     /// Adds another open subject path to the Clipper instance.
+    ///
+    /// The boolean operations return the closed paths of the result only:
+    /// what is left of open subjects is not returned.
     ///
     /// # Examples
     ///

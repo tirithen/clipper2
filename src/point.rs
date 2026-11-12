@@ -165,7 +165,9 @@ impl<P: PointScaler> Point<P> {
         PhantomData,
     );
 
-    /// Create a new point.
+    /// Create a new point. The coordinates are scaled and rounded to the
+    /// integer grid of `P`: NaN becomes 0, and infinite or out-of-range values
+    /// saturate to the grid's limits, where boolean results are not reliable.
     pub fn new(x: f64, y: f64) -> Self {
         Self(
             ClipperPoint64 {
