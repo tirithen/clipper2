@@ -131,14 +131,32 @@ mod test {
     fn empty_paths_offset_with_every_end_type() {
         use crate::Path;
         let square = Path::<Centi>::from(vec![(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]);
-        for end_type in [EndType::Polygon, EndType::Joined, EndType::Butt, EndType::Square, EndType::Round] {
-            for join_type in [JoinType::Square, JoinType::Bevel, JoinType::Round, JoinType::Miter] {
+        for end_type in [
+            EndType::Polygon,
+            EndType::Joined,
+            EndType::Butt,
+            EndType::Square,
+            EndType::Round,
+        ] {
+            for join_type in [
+                JoinType::Square,
+                JoinType::Bevel,
+                JoinType::Round,
+                JoinType::Miter,
+            ] {
                 let empty = Paths::<Centi>::new(vec![Path::default()]);
                 assert!(inflate(empty.clone(), 1.0, join_type, end_type, 2.0).is_empty());
-                assert!(inflate_with_arc_tolerance(empty, 1.0, join_type, end_type, 2.0, 0.01).is_empty());
+                assert!(
+                    inflate_with_arc_tolerance(empty, 1.0, join_type, end_type, 2.0, 0.01)
+                        .is_empty()
+                );
                 let mixed = Paths::new(vec![Path::default(), square.clone()]);
                 let alone = inflate(square.clone(), 1.0, join_type, end_type, 2.0);
-                assert_eq!(inflate(mixed, 1.0, join_type, end_type, 2.0), alone, "{join_type:?} {end_type:?}");
+                assert_eq!(
+                    inflate(mixed, 1.0, join_type, end_type, 2.0),
+                    alone,
+                    "{join_type:?} {end_type:?}"
+                );
             }
         }
     }
