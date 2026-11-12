@@ -126,7 +126,8 @@ impl<P: PointScaler> Path<P> {
         )
     }
 
-    /// Construct a rotated clone of the path with the origin at the path center
+    /// Construct a rotated clone of the path with the origin at the path
+    /// center, counter-clockwise for a positive angle with y pointing up.
     pub fn rotate(&self, radians: f64) -> Self {
         let bounds = self.bounds();
         let center = bounds.center();
@@ -138,8 +139,8 @@ impl<P: PointScaler> Path<P> {
                 .iter()
                 .map(|p| {
                     Point::<P>::new(
-                        (center.x() - p.x()) * cos - (center.y() - p.y()) * sin + center.x(),
-                        (center.x() - p.x()) * sin + (center.y() - p.y()) * cos + center.y(),
+                        (p.x() - center.x()) * cos - (p.y() - center.y()) * sin + center.x(),
+                        (p.x() - center.x()) * sin + (p.y() - center.y()) * cos + center.y(),
                     )
                 })
                 .collect(),
@@ -561,6 +562,14 @@ mod test {
     use crate::Deci;
 
     use super::*;
+
+    #[test]
+    fn rotate_turns_around_the_center() {
+        let path = Path::<Centi>::from(vec![(0.0, 0.0), (2.0, 0.0), (2.0, 1.0)]);
+        assert_eq!(path.rotate(0.0), path);
+        let quarter: Vec<(f64, f64)> = path.rotate(std::f64::consts::FRAC_PI_2).into();
+        assert_eq!(quarter, vec![(1.5, -0.5), (1.5, 1.5), (0.5, 1.5)]);
+    }
 
     #[test]
     fn contains_points_when_not_empty() {
