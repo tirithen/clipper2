@@ -58,7 +58,7 @@ impl<P: PointScaler> Path<P> {
 
     /// Returns `true` if the path contains at least one point
     pub fn contains_points(&self) -> bool {
-        self.is_empty()
+        !self.is_empty()
     }
 
     /// Creates a path in a rectangle shape
@@ -561,6 +561,12 @@ mod test {
     use crate::Deci;
 
     use super::*;
+
+    #[test]
+    fn contains_points_when_not_empty() {
+        assert!(Path::<Centi>::from(vec![(1.0, 2.0)]).contains_points());
+        assert!(!Path::<Centi>::default().contains_points());
+    }
 
     #[test]
     fn test_default() {
