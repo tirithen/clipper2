@@ -75,12 +75,11 @@ dependencies = [
 
 [[package]]
 name = "clipper2c-sys"
-version = "0.2.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0afb0f7cef3e89b98fb687395b7d12c70521871f3a876465641ed5aeb450b9a8"
+checksum = "e7f2411d37a22c8cce3a56ded3381a2b73fd99feab5c97ded83ea37d3226aca5"
 dependencies = [
  "cc",
- "libc",
  "serde",
 ]
 
