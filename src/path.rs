@@ -407,7 +407,12 @@ impl<P: PointScaler> Path<P> {
     /// ```
     ///
     pub fn signed_area(&self) -> f64 {
-        unsafe { clipper_path64_area(self.to_clipperpath64()) / (P::MULTIPLIER * P::MULTIPLIER) }
+        unsafe {
+            let path = self.to_clipperpath64();
+            let area = clipper_path64_area(path) / (P::MULTIPLIER * P::MULTIPLIER);
+            clipper_delete_path64(path);
+            area
+        }
     }
 
     /// Returns the closest point on the path to a given point
