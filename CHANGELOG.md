@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. Commit messages follow the [Conventional Commits](https://www.conventionalcommits.org/) specification, which drives the version bumps and the per-release sections below.
 
+### [0.6.1](https://github.com/tirithen/clipper2/compare/v0.6.0...v0.6.1) (2026-11-12)
+
+### Bug Fixes
+
+* free the C++ path in Path::signed_area ([cf49ee8](https://github.com/tirithen/clipper2/commit/cf49ee850b4c5f728ef22d471d06247a6d96439c))
+* leave empty paths out of offsets ([3036058](https://github.com/tirithen/clipper2/commit/3036058d1e79d0c36d09bf8a4dbeefbbc6d8f9c0))
+* contains_points is true when the path has points ([fa2f260](https://github.com/tirithen/clipper2/commit/fa2f26074578fd3ed0e9f4e153e5e4ff90d95b1d))
+* rotate around the center instead of through it ([b8934d7](https://github.com/tirithen/clipper2/commit/b8934d77b074e90fb0a022b04efdafba9a9720f9))
+* convert the paths before allocating the result ([8d949c8](https://github.com/tirithen/clipper2/commit/8d949c824f4552a886937d3ac999dae47ed97e83))
+* require clipper2c-sys 0.2.1 ([1f72efe](https://github.com/tirithen/clipper2/commit/1f72efe79a542426ae114eaad2cfadbc9087da69))
+
+### Features
+
+* add Micro and Nano point scalers ([1888ca3](https://github.com/tirithen/clipper2/commit/1888ca3d72649a3a66ef08c07514e5d2d4a203ae))
+* union subjects without a clip ([03468b0](https://github.com/tirithen/clipper2/commit/03468b0e845a77b510a7693fbe8d4a660f04762f))
+* offset with an absolute arc tolerance ([b3222ce](https://github.com/tirithen/clipper2/commit/b3222ce76855f03bca1abedd6a79fb2fa2461b7b))
+
 ### [0.6.0](https://github.com/tirithen/clipper2/compare/v0.5.4...v0.6.0) (2026-05-06)
 
 ### BREAKING CHANGES
