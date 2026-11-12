@@ -34,10 +34,11 @@ pub fn simplify<P: PointScaler>(
     is_open: bool,
 ) -> Paths<P> {
     let epsilon = P::scale(epsilon);
+    let paths: Paths<P> = paths.into();
 
     unsafe {
+        let paths_ptr = paths.to_clipperpaths64();
         let mem = malloc(clipper_paths64_size());
-        let paths_ptr = paths.into().to_clipperpaths64();
         let result_ptr = clipper_paths64_simplify(mem, paths_ptr, epsilon, is_open.into());
         clipper_delete_paths64(paths_ptr);
         let result = Paths::from_clipperpaths64(result_ptr);

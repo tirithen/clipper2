@@ -43,8 +43,8 @@ pub fn inflate<P: PointScaler>(
     let paths = without_empty(paths.into());
 
     unsafe {
-        let mem = malloc(clipper_paths64_size());
         let paths_ptr = paths.to_clipperpaths64();
+        let mem = malloc(clipper_paths64_size());
         let result_ptr = clipper_paths64_inflate(
             mem,
             paths_ptr,
